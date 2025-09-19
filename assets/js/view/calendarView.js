@@ -151,12 +151,12 @@ export const CalendarView = {
 
         if (dayTasks.length > 0) {
           const list = document.createElement('div');
-          list.className = 'calendar-day-tasks mt-2';
+          list.className = 'd-flex flex-column gap-1 mt-2';
 
           dayTasks.forEach(task => {
             const badge = document.createElement('span');
             const badgeClass = STATUS_BADGE[task.status] || 'text-bg-primary';
-            badge.className = `badge ${badgeClass} d-block text-start text-wrap w-100 calendar-task-badge`;
+            badge.className = `badge ${badgeClass} d-block text-start text-wrap w-100`;
             badge.textContent = this._formatTaskLabel(task);
             const periodLabel = this._formatTaskPeriod(task);
             if (periodLabel) {
@@ -164,19 +164,6 @@ export const CalendarView = {
             } else {
               badge.title = task.title;
             }
-
-            badge.tabIndex = 0;
-            badge.setAttribute('role', 'button');
-            badge.addEventListener('click', () => {
-              EventBus.emit('openTaskDetail', task);
-            });
-            badge.addEventListener('keydown', event => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                EventBus.emit('openTaskDetail', task);
-              }
-            });
-
             list.appendChild(badge);
           });
 

@@ -10,31 +10,10 @@ body {
 
 .calendar-day-cell {
   min-height: 120px;
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
 .calendar-day-cell .badge {
   white-space: normal;
-}
-
-.calendar-day-tasks {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  flex: 1 1 auto;
-}
-
-.calendar-task-badge {
-  cursor: pointer;
-  white-space: normal;
-}
-
-.calendar-task-badge:focus {
-  outline: 0;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 .task-card {
