@@ -9,17 +9,24 @@ export const ListView = {
     const tasks = TaskModel.getTasks();
     const filtered = currentTopic === 'Todos' ? tasks : tasks.filter(t => t.topic === currentTopic);
 
-    const statusList = ['todo', 'doing', 'done'];
-    const statusLabels = {
-      'todo': 'A Fazer',
-      'doing': 'Em Progresso',
-      'done': 'Concluído'
-    };
+    const statuses = TaskModel.getStatuses();
 
     const row = document.createElement('div');
     row.className = 'row';
 
-    statusList.forEach(status => {
+    if (!Array.isArray(statuses) || statuses.length === 0) {
+      const emptyCol = document.createElement('div');
+      emptyCol.className = 'col-12';
+      const emptyBox = document.createElement('div');
+      emptyBox.className = 'alert alert-light border text-center';
+      emptyBox.textContent = 'Nenhum status disponível.';
+      emptyCol.appendChild(emptyBox);
+      row.appendChild(emptyCol);
+      content.appendChild(row);
+      return;
+    }
+
+    statuses.forEach(status => {
       const col = document.createElement('div');
       col.className = 'col-md-4 mb-3';
 
@@ -27,12 +34,12 @@ export const ListView = {
       box.className = 'border rounded bg-white shadow-sm p-2';
 
       const header = document.createElement('h6');
-      header.textContent = statusLabels[status];
+      header.textContent = status.label;
       header.className = 'text-primary border-bottom pb-1 mb-2';
 
       box.appendChild(header);
 
-      filtered.filter(t => t.status === status).forEach(task => {
+      filtered.filter(t => t.status === status.id).forEach(task => {
         const card = document.createElement('div');
 
         card.className = 'card mb-2 task-card';
@@ -125,6 +132,12 @@ EventBus.on('taskRemoved', () => {
 });
 
 EventBus.on('tasksBulkUpdated', () => {
+  const activeTab = document.querySelector('#tab-topics .nav-link.active');
+  const topic = activeTab?.dataset.topic || 'Todos';
+  ListView.render(topic);
+});
+
+EventBus.on('statusesChanged', () => {
   const activeTab = document.querySelector('#tab-topics .nav-link.active');
   const topic = activeTab?.dataset.topic || 'Todos';
   ListView.render(topic);
