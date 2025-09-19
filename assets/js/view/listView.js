@@ -57,25 +57,23 @@ export const ListView = {
     content.appendChild(row);
   }
 };
-  
-// Atualiza ao selecionar tópico
+
 EventBus.on('topicSelected', topic => {
   ListView.render(topic);
 });
 
-// Atualiza quando tarefa for adicionada
 EventBus.on('taskAdded', () => {
   const activeTab = document.querySelector('#tab-topics .nav-link.active');
   const topic = activeTab?.dataset.topic || 'Todos';
   ListView.render(topic);
 });
-// Atualiza quando tarefa for atualizada
+
 EventBus.on('taskUpdated', () => {
   const activeTab = document.querySelector('#tab-topics .nav-link.active');
   const topic = activeTab?.dataset.topic || 'Todos';
   ListView.render(topic);
 });
-// Atualiza quando tarefa for removida
+
 EventBus.on('taskRemoved', () => {
   const activeTab = document.querySelector('#tab-topics .nav-link.active');
   const topic = activeTab?.dataset.topic || 'Todos';

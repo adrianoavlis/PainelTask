@@ -1,5 +1,3 @@
-
-import { TaskModel } from '../model/taskModel.js';
 import { EventBus } from '../core/eventBus.js';
 
 export const TabsView = {
@@ -8,6 +6,8 @@ export const TabsView = {
     ul.innerHTML = '';
 
     const allTopics = ['Todos', ...topics];
+    let firstTopic = allTopics[0];
+
     allTopics.forEach((topic, index) => {
       const li = document.createElement('li');
       li.className = 'nav-item';
@@ -28,10 +28,13 @@ export const TabsView = {
       li.appendChild(a);
       ul.appendChild(li);
     });
+
+    if (firstTopic) {
+      EventBus.emit('topicSelected', firstTopic);
+    }
   }
 };
 
-// Atualiza abas quando os dados forem carregados
 EventBus.on('dataLoaded', (data) => {
   TabsView.render(data.topics);
 });
