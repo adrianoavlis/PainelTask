@@ -4,6 +4,10 @@ import { EventBus } from '../core/eventBus.js';
 
 const FALLBACK_TOPIC = 'Geral';
 
+const ALLOWED_STATUSES = new Set(['todo', 'doing', 'done']);
+
+const normalizeStatus = (status) => ALLOWED_STATUSES.has(status) ? status : 'todo';
+
 const normalizeTopicName = (topic) =>
   typeof topic === 'string' ? topic.trim() : '';
 
@@ -56,6 +60,7 @@ export const TaskModel = {
 
     task.id = `t-${Date.now()}`;
     task.topic = topic;
+    task.status = normalizeStatus(task.status);
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
 
@@ -74,7 +79,6 @@ export const TaskModel = {
     }
 
     const defaultTopic = this.data.topics[0] || FALLBACK_TOPIC;
-    const allowedStatuses = new Set(['todo', 'doing', 'done']);
     const now = nowISO();
     const baseTime = Date.now();
     const imported = [];
@@ -96,7 +100,7 @@ export const TaskModel = {
       }
 
       const topic = this._resolveExistingTopic(incomingTask.topic) || defaultTopic;
-      const status = allowedStatuses.has(incomingTask.status) ? incomingTask.status : 'todo';
+      const status = normalizeStatus(incomingTask.status);
       const priority = typeof incomingTask.priority === 'string' && incomingTask.priority.trim()
         ? incomingTask.priority
         : 'medium';
@@ -148,6 +152,7 @@ export const TaskModel = {
       const topic = this._resolveExistingTopic(updatedTask.topic) || this.data.topics[0] || FALLBACK_TOPIC;
 
       updatedTask.topic = topic;
+      updatedTask.status = normalizeStatus(updatedTask.status);
       updatedTask.updatedAt = nowISO();
       this.data.tasks[index] = updatedTask;
 
@@ -291,8 +296,20 @@ export const TaskModel = {
 
     this.data.tasks.forEach(task => {
       const resolved = this._resolveExistingTopic(task.topic) || fallbackTopic;
+      const normalizedStatus = normalizeStatus(task.status);
+      let updated = false;
+
       if (task.topic !== resolved) {
         task.topic = resolved;
+        updated = true;
+      }
+
+      if (task.status !== normalizedStatus) {
+        task.status = normalizedStatus;
+        updated = true;
+      }
+
+      if (updated) {
         task.updatedAt = nowISO();
         needsPersist = true;
       }

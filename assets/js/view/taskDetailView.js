@@ -1,6 +1,12 @@
 import { EventBus } from '../core/eventBus.js';
 import { TaskModel } from '../model/taskModel.js';
 
+const STATUS_DETAILS = {
+  todo: { label: 'A Fazer', className: 'bg-secondary' },
+  doing: { label: 'Em Progresso', className: 'bg-info text-dark' },
+  done: { label: 'Concluído', className: 'bg-success' }
+};
+
 export const TaskDetailView = {
   modal: null,
   modalEl: null,
@@ -34,9 +40,20 @@ export const TaskDetailView = {
                   <p class="mb-0" data-detail="dueDate"></p>
                 </div>
               </div>
-              <div class="mt-3">
-                <h6 class="fw-bold">Prioridade</h6>
-                <span class="badge" data-detail="priority"></span>
+              <div class="mt-3 row g-3 align-items-end">
+                <div class="col-md-6">
+                  <h6 class="fw-bold mb-1">Status</h6>
+                  <select class="form-select" data-detail="statusSelect">
+                    <option value="todo">A Fazer</option>
+                    <option value="doing">Em Progresso</option>
+                    <option value="done">Concluído</option>
+                  </select>
+                  <small class="d-block mt-2 text-muted">Atual: <span class="badge" data-detail="statusBadge"></span></small>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="fw-bold mb-1">Prioridade</h6>
+                  <span class="badge" data-detail="priority"></span>
+                </div>
               </div>
               <div class="mt-3">
                 <h6 class="fw-bold">Tags</h6>
@@ -62,6 +79,29 @@ export const TaskDetailView = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     this.modalEl = document.getElementById('taskDetailModal');
     this.modal = new bootstrap.Modal(this.modalEl);
+
+    const statusSelect = this.modalEl.querySelector('[data-detail="statusSelect"]');
+    statusSelect.addEventListener('change', event => {
+      if (!this.currentTask) {
+        return;
+      }
+
+      const newStatus = event.target.value;
+      if (!STATUS_DETAILS[newStatus]) {
+        event.target.value = this.currentTask.status || 'todo';
+        return;
+      }
+
+      const latestTask = TaskModel.getTaskById(this.currentTask.id);
+      if (!latestTask || latestTask.status === newStatus) {
+        return;
+      }
+
+      const updatedTask = { ...latestTask, status: newStatus };
+      TaskModel.updateTask(updatedTask);
+      this.currentTask = { ...updatedTask };
+      this.fillDetails(this.currentTask);
+    });
 
     this.modalEl.querySelector('[data-action="edit"]').addEventListener('click', () => {
       if (!this.currentTask) return;
@@ -100,6 +140,13 @@ export const TaskDetailView = {
     this.setText('startDate', task.startDate || '—');
     this.setText('dueDate', task.dueDate || '—');
 
+    const statusValue = STATUS_DETAILS[task.status] ? task.status : 'todo';
+    const statusSelect = this.modalEl.querySelector('[data-detail="statusSelect"]');
+    if (statusSelect) {
+      statusSelect.value = statusValue;
+    }
+    this._updateStatusBadge(statusValue);
+
     const priorityEl = this.modalEl.querySelector('[data-detail="priority"]');
     const priorityLabels = {
       high: { text: 'Alta', className: 'bg-danger' },
@@ -131,6 +178,9 @@ export const TaskDetailView = {
 
   clearDetails() {
     this.modalEl.querySelectorAll('[data-detail]').forEach(el => {
+      if (el.tagName === 'SELECT') {
+        return;
+      }
       if (el.tagName === 'DIV' || el.tagName === 'SPAN') {
         el.innerHTML = '';
       } else {
@@ -141,6 +191,11 @@ export const TaskDetailView = {
     if (priorityEl) {
       priorityEl.className = 'badge';
     }
+    const statusSelect = this.modalEl.querySelector('[data-detail="statusSelect"]');
+    if (statusSelect) {
+      statusSelect.value = 'todo';
+    }
+    this._updateStatusBadge('todo');
   },
 
   setText(attribute, text) {
@@ -148,5 +203,16 @@ export const TaskDetailView = {
     if (element) {
       element.textContent = text;
     }
+  },
+
+  _updateStatusBadge(status) {
+    const statusBadge = this.modalEl.querySelector('[data-detail="statusBadge"]');
+    if (!statusBadge) {
+      return;
+    }
+
+    const statusInfo = STATUS_DETAILS[status] || { label: 'A Fazer', className: 'bg-secondary' };
+    statusBadge.className = `badge ${statusInfo.className}`;
+    statusBadge.textContent = statusInfo.label;
   }
 };
