@@ -693,6 +693,7 @@ footer {
   flex-direction: column;
   max-height: min(90vh, 62rem);
   overflow-x: hidden;
+
 }
 
 .task-form-modal__form {
@@ -700,6 +701,7 @@ footer {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+
 }
 
 .task-form-modal__hero {
