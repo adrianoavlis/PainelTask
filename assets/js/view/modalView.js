@@ -1,4 +1,3 @@
-
 import { TaskModel } from '../model/taskModel.js';
 import { EventBus } from '../core/eventBus.js';
 
@@ -20,9 +19,7 @@ export const ModalView = {
               </div>
               <div class="col-md-6">
                 <label class="form-label">Assunto</label>
-                <select class="form-select" name="topic" required>
-                  ${TaskModel.getTopics().map(t => `<option value="\${t}">\${t}</option>`).join('')}
-                </select>
+                <select class="form-select" name="topic" required></select>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Data de Início</label>
@@ -55,6 +52,7 @@ export const ModalView = {
     </div>`;
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+    this.updateTopicOptions();
 
     const form = document.getElementById('taskForm');
     form.addEventListener('submit', (e) => {
@@ -62,7 +60,17 @@ export const ModalView = {
       const data = Object.fromEntries(new FormData(form).entries());
       TaskModel.addTask(data);
       bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+      form.reset();
     });
+  },
+
+  updateTopicOptions() {
+    const select = document.querySelector('#taskForm select[name="topic"]');
+    if (!select) return;
+    const options = TaskModel.getTopics()
+      .map(topic => `<option value="${topic}">${topic}</option>`)
+      .join('');
+    select.innerHTML = options;
   },
 
   open() {
@@ -72,5 +80,7 @@ export const ModalView = {
   }
 };
 
-// Escutar evento global para abrir modal
+EventBus.on('dataLoaded', () => ModalView.updateTopicOptions());
+EventBus.on('taskAdded', () => ModalView.updateTopicOptions());
+EventBus.on('taskUpdated', () => ModalView.updateTopicOptions());
 EventBus.on('openTaskModal', () => ModalView.open());
