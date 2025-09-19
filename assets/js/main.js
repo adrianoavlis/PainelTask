@@ -11,12 +11,14 @@ import { ExportUtils } from './core/exportUtils.js';
 import { ICSUtils } from './core/icsUtils.js';
 import { EventBus } from './core/eventBus.js';
 import { TopicManagerView } from './view/topicManagerView.js';
+import { CollaboratorManagerView } from './view/collaboratorManagerView.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   ToastView.init();
   ModalView.init();
   TaskDetailView.init();
   TopicManagerView.init();
+  CollaboratorManagerView.init();
 
   const modeToggleBtn = document.getElementById('toggle-mode');
   const importBtn = document.getElementById('import-json');
@@ -148,5 +150,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     ToastView.show(message, 'warning');
+  });
+
+  EventBus.on('collaboratorAdded', (collaborator) => {
+    ToastView.show(`Colaborador "${collaborator}" adicionado com sucesso!`, 'success');
+  });
+
+  EventBus.on('collaboratorUpdated', ({ oldName, newName }) => {
+    const suffix = oldName !== newName ? ` Atualizado para "${newName}".` : '';
+    ToastView.show(`Colaborador editado.${suffix}`, 'info');
+  });
+
+  EventBus.on('collaboratorRemoved', (collaborator) => {
+    ToastView.show(`Colaborador "${collaborator}" removido.`, 'warning');
   });
 });

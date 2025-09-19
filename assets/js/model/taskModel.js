@@ -11,12 +11,16 @@ const normalizeStatus = (status) => ALLOWED_STATUSES.has(status) ? status : 'tod
 const normalizeTopicName = (topic) =>
   typeof topic === 'string' ? topic.trim() : '';
 
+const normalizeCollaboratorName = (name) =>
+  typeof name === 'string' ? name.trim() : '';
+
 const nowISO = () => new Date().toISOString();
 
 export const TaskModel = {
   data: {
     meta: {},
     topics: [],
+    collaborators: [],
     tasks: []
   },
 
@@ -34,6 +38,10 @@ export const TaskModel = {
       this.data.tasks = [];
     }
 
+    if (!Array.isArray(this.data.collaborators)) {
+      this.data.collaborators = [];
+    }
+
     if (this.data.topics.length === 0) {
       this.data.topics.push(FALLBACK_TOPIC);
     }
@@ -49,6 +57,10 @@ export const TaskModel = {
 
   getTopics() {
     return this.data.topics;
+  },
+
+  getCollaborators() {
+    return this.data.collaborators;
   },
 
   getTaskById(id) {
@@ -168,6 +180,71 @@ export const TaskModel = {
       this.persist();
       EventBus.emit('taskRemoved', removedTask);
     }
+  },
+
+  addCollaborator(name) {
+    const collaborator = normalizeCollaboratorName(name);
+    if (!collaborator) {
+      return { success: false, reason: 'empty' };
+    }
+
+    if (this._findCollaboratorInsensitive(collaborator)) {
+      return { success: false, reason: 'duplicate' };
+    }
+
+    this.data.collaborators.push(collaborator);
+    this.persist();
+
+    EventBus.emit('collaboratorAdded', collaborator);
+    EventBus.emit('collaboratorsChanged', [...this.data.collaborators]);
+
+    return { success: true, collaborator };
+  },
+
+  updateCollaborator(oldName, newName) {
+    const current = this._findCollaboratorInsensitive(oldName);
+    if (!current) {
+      return { success: false, reason: 'notfound' };
+    }
+
+    const collaboratorIndex = this.data.collaborators.indexOf(current);
+    const normalizedNew = normalizeCollaboratorName(newName);
+
+    if (!normalizedNew) {
+      return { success: false, reason: 'empty' };
+    }
+
+    const existing = this._findCollaboratorInsensitive(normalizedNew);
+    if (existing && existing !== current) {
+      return { success: false, reason: 'duplicate' };
+    }
+
+    if (current === normalizedNew) {
+      return { success: false, reason: 'unchanged' };
+    }
+
+    this.data.collaborators[collaboratorIndex] = normalizedNew;
+    this.persist();
+
+    EventBus.emit('collaboratorUpdated', { oldName: current, newName: normalizedNew });
+    EventBus.emit('collaboratorsChanged', [...this.data.collaborators]);
+
+    return { success: true, newName: normalizedNew };
+  },
+
+  removeCollaborator(name) {
+    const collaborator = this._findCollaboratorInsensitive(name);
+    if (!collaborator) {
+      return { success: false, reason: 'notfound' };
+    }
+
+    this.data.collaborators = this.data.collaborators.filter(item => item !== collaborator);
+    this.persist();
+
+    EventBus.emit('collaboratorRemoved', collaborator);
+    EventBus.emit('collaboratorsChanged', [...this.data.collaborators]);
+
+    return { success: true };
   },
 
   addTopic(name) {
@@ -328,5 +405,11 @@ export const TaskModel = {
 
   _resolveExistingTopic(topicName) {
     return this._findTopicInsensitive(topicName);
+  },
+
+  _findCollaboratorInsensitive(name) {
+    if (!name) return undefined;
+    const normalized = normalizeCollaboratorName(name).toLowerCase();
+    return this.data.collaborators.find(collaborator => collaborator.toLowerCase() === normalized);
   }
 };

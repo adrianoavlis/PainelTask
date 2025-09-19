@@ -8,6 +8,11 @@
     "Trabalho",
     "Pessoal"
   ],
+  "collaborators": [
+    "Maria Silva",
+    "João Santos",
+    "Beatriz Lima"
+  ],
   "tasks": [
     {
       "id": "t-20250919-001",
