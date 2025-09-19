@@ -1,4 +1,3 @@
-
 export const ToastView = {
   init() {
     const toastContainer = document.createElement('div');
@@ -17,12 +16,12 @@ export const ToastView = {
     toast.ariaAtomic = 'true';
     toast.id = toastId;
 
-    toast.innerHTML = \`
+    toast.innerHTML = `
       <div class="d-flex">
-        <div class="toast-body">\${message}</div>
+        <div class="toast-body">${message}</div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
       </div>
-    \`;
+    `;
 
     document.getElementById('toast-container').appendChild(toast);
 
