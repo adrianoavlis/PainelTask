@@ -241,7 +241,14 @@ EventBus.on('dataLoaded', () => {
   CalendarView.render();
 });
 
+EventBus.on('taskAdded', () => {
+  CalendarView.render();
+});
 
-EventBus.on('tasksBulkUpdated', () => {
+EventBus.on('taskUpdated', () => {
+  CalendarView.render();
+});
+
+EventBus.on('taskRemoved', () => {
   CalendarView.render();
 });
