@@ -223,7 +223,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     ToastView.show(message, 'warning');
   });
 
+
   EventBus.on('statusesReordered', () => {
     ToastView.show('Ordem dos status atualizada!', 'info');
   });
+
 });

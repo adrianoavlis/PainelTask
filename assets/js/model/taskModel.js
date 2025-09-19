@@ -57,6 +57,37 @@ export const TaskModel = {
       this.data.tasks = [];
     }
 
+    const sanitizedTasks = [];
+    const usedIds = new Set();
+    const baseTime = Date.now();
+
+    this.data.tasks.forEach((task, index) => {
+      if (!task || typeof task !== 'object') {
+        return;
+      }
+
+      let id = typeof task.id === 'string' ? task.id.trim() : '';
+      if (!id) {
+        id = `t-${baseTime + index}`;
+      }
+
+      while (usedIds.has(id)) {
+        id = `t-${baseTime + index}-${usedIds.size}`;
+      }
+
+      usedIds.add(id);
+
+      const normalizedTask = {
+        ...task,
+        id,
+        dependencies: Array.isArray(task.dependencies) ? [...task.dependencies] : []
+      };
+
+      sanitizedTasks.push(normalizedTask);
+    });
+
+    this.data.tasks = sanitizedTasks;
+
     if (!Array.isArray(this.data.collaborators)) {
       this.data.collaborators = [];
     }
@@ -92,7 +123,9 @@ export const TaskModel = {
     }
 
     this.data.statuses = normalizedStatuses;
+
     this._applyStatusOrderMetadata();
+
 
     if (this.data.topics.length === 0) {
       this.data.topics.push(FALLBACK_TOPIC);
@@ -151,6 +184,7 @@ export const TaskModel = {
     task.topic = topic;
     task.collaborator = this._resolveExistingCollaborator(task.collaborator) || null;
     task.status = this._normalizeStatusId(task.status);
+
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
 
@@ -208,8 +242,14 @@ export const TaskModel = {
         }))
         : [];
 
+      const taskId = `t-${baseTime + index}`;
+      const dependencies = this._normalizeDependencies(incomingTask.dependencies, {
+        excludeId: taskId,
+        validIds: new Set(this.data.tasks.map(task => task.id))
+      });
+
       const task = {
-        id: `t-${baseTime + index}`,
+        id: taskId,
         title,
         topic,
         status,
@@ -222,6 +262,7 @@ export const TaskModel = {
         tags,
         notes: typeof incomingTask.notes === 'string' ? incomingTask.notes : '',
         checklist,
+        dependencies,
         createdAt: now,
         updatedAt: now
       };
@@ -241,8 +282,10 @@ export const TaskModel = {
 
   updateTask(updatedTask) {
     const index = this.data.tasks.findIndex(t => t.id === updatedTask.id);
-    if (index !== -1) {
-      const topic = this._resolveExistingTopic(updatedTask.topic) || this.data.topics[0] || FALLBACK_TOPIC;
+    if (index === -1) {
+      return;
+    }
+
 
       updatedTask.topic = topic;
       updatedTask.collaborator = this._resolveExistingCollaborator(updatedTask.collaborator) || null;
@@ -250,17 +293,38 @@ export const TaskModel = {
       updatedTask.updatedAt = nowISO();
       this.data.tasks[index] = updatedTask;
 
-      this.persist();
-      EventBus.emit('taskUpdated', updatedTask);
-    }
+
+    this.data.tasks[index] = mergedTask;
+
+    this.persist();
+    EventBus.emit('taskUpdated', mergedTask);
   },
 
   removeTask(id) {
     const index = this.data.tasks.findIndex(task => task.id === id);
     if (index !== -1) {
       const [removedTask] = this.data.tasks.splice(index, 1);
+
+      let clearedDependencies = 0;
+      const now = nowISO();
+      this.data.tasks.forEach(task => {
+        if (!Array.isArray(task.dependencies) || task.dependencies.length === 0) {
+          return;
+        }
+
+        if (task.dependencies.includes(removedTask.id)) {
+          task.dependencies = task.dependencies.filter(depId => depId !== removedTask.id);
+          task.updatedAt = now;
+          clearedDependencies++;
+        }
+      });
+
       this.persist();
       EventBus.emit('taskRemoved', removedTask);
+
+      if (clearedDependencies > 0) {
+        EventBus.emit('tasksBulkUpdated', [...this.data.tasks]);
+      }
     }
   },
 
@@ -384,7 +448,9 @@ export const TaskModel = {
     };
 
     this.data.statuses.push(status);
+
     this._applyStatusOrderMetadata();
+
     this.persist();
 
     EventBus.emit('statusAdded', { ...status });
@@ -415,7 +481,9 @@ export const TaskModel = {
 
     const previousLabel = status.label;
     status.label = normalizedLabel;
+
     this._applyStatusOrderMetadata();
+
 
     this.persist();
 
@@ -448,7 +516,9 @@ export const TaskModel = {
     }
 
     this.data.statuses = remaining;
+
     this._applyStatusOrderMetadata();
+
 
     let reassignedCount = 0;
     const now = nowISO();
@@ -475,6 +545,7 @@ export const TaskModel = {
 
     return { success: true, fallback, reassignedCount };
   },
+
 
   reorderStatuses(orderIds) {
     if (!Array.isArray(this.data.statuses) || this.data.statuses.length === 0) {
@@ -521,6 +592,7 @@ export const TaskModel = {
 
     return { success: true, reordered: true };
   },
+
 
   addTopic(name) {
     const topic = normalizeTopicName(name);
@@ -676,6 +748,16 @@ export const TaskModel = {
         updated = true;
       }
 
+      const normalizedDependencies = this._normalizeDependencies(task.dependencies, {
+        excludeId: task.id,
+        validIds: validTaskIds
+      });
+
+      if (!this._areArraysEqual(task.dependencies, normalizedDependencies)) {
+        task.dependencies = normalizedDependencies;
+        updated = true;
+      }
+
       if (updated) {
         task.updatedAt = nowISO();
         needsPersist = true;
@@ -688,6 +770,7 @@ export const TaskModel = {
       this.persist();
     }
   },
+
 
   _applyStatusOrderMetadata() {
     if (!Array.isArray(this.data.statuses)) {
@@ -703,6 +786,7 @@ export const TaskModel = {
       status.nextId = next ? next.id : null;
     });
   },
+
 
   _normalizeStatusDefinition(status) {
     if (!status) {
@@ -793,5 +877,6 @@ export const TaskModel = {
     const fallback = { ...DEFAULT_STATUSES[0] };
     this.data.statuses.push(fallback);
     return fallback.id;
+
   }
 };

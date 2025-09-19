@@ -8,7 +8,9 @@ export const StatusManagerView = {
   listEl: null,
   formEl: null,
   inputEl: null,
+
   dragSetup: false,
+
 
   init() {
     const manageButton = document.getElementById('manage-statuses');
@@ -47,7 +49,9 @@ export const StatusManagerView = {
               </form>
               <div class="mt-4">
                 <h6 class="fw-semibold">Status cadastrados</h6>
+
                 <p class="text-muted small mb-2">Arraste os status para definir a ordem do fluxo.</p>
+
                 <div data-status-list class="list-group"></div>
               </div>
             </div>
@@ -68,6 +72,7 @@ export const StatusManagerView = {
     this.inputEl = this.modalEl.querySelector('#statusManagerInput');
 
     this._setupDragAndDrop();
+
 
     this.modalEl.addEventListener('shown.bs.modal', () => {
       this.inputEl?.focus();
@@ -101,6 +106,7 @@ export const StatusManagerView = {
 
     const tasks = TaskModel.getTasks();
 
+
     statuses.forEach((status, index) => {
       const item = document.createElement('div');
       item.className = 'list-group-item d-flex justify-content-between align-items-center gap-2 flex-wrap';
@@ -124,6 +130,7 @@ export const StatusManagerView = {
       orderBadge.className = 'badge rounded-pill text-bg-light text-dark border';
       orderBadge.textContent = `#${previousOrder + 1}`;
 
+
       const badge = document.createElement('span');
       badge.className = `badge ${status.badgeClass || 'text-bg-secondary'}`;
       badge.textContent = status.label;
@@ -137,8 +144,10 @@ export const StatusManagerView = {
       countBadge.className = 'badge bg-light text-dark';
       countBadge.textContent = `${count} tarefa${count === 1 ? '' : 's'}`;
 
+
       infoContainer.appendChild(dragHandle);
       infoContainer.appendChild(orderBadge);
+
       infoContainer.appendChild(badge);
       infoContainer.appendChild(code);
       infoContainer.appendChild(countBadge);
@@ -150,7 +159,9 @@ export const StatusManagerView = {
       renameBtn.type = 'button';
       renameBtn.className = 'btn btn-outline-secondary';
       renameBtn.textContent = 'Renomear';
+
       renameBtn.draggable = false;
+
       renameBtn.addEventListener('click', () => {
         this._handleRenameStatus(status);
       });
@@ -159,7 +170,9 @@ export const StatusManagerView = {
       deleteBtn.type = 'button';
       deleteBtn.className = 'btn btn-outline-danger';
       deleteBtn.textContent = 'Excluir';
+
       deleteBtn.draggable = false;
+
       deleteBtn.addEventListener('click', () => {
         this._handleRemoveStatus(status);
       });
@@ -216,12 +229,15 @@ export const StatusManagerView = {
       duplicate: 'Já existe um status com esse nome.',
       unchanged: 'O status já possui esse nome.',
       notfound: 'Status não encontrado.',
+
       minimum: 'Mantenha pelo menos um status cadastrado.',
       order: 'Não foi possível reordenar os status.'
+
     };
 
     const message = messages[reason] || 'Não foi possível completar a ação.';
     ToastView.show(message, 'danger');
+
   },
 
   _setupDragAndDrop() {
@@ -313,5 +329,6 @@ export const StatusManagerView = {
 
       return closest;
     }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+
   }
 };
