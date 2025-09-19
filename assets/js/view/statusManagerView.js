@@ -8,9 +8,11 @@ export const StatusManagerView = {
   listEl: null,
   formEl: null,
   inputEl: null,
+
   dragSetup: false,
   modalInitBound: false,
   pendingOpen: false,
+
 
   init() {
     const manageButton = document.getElementById('manage-statuses');
@@ -49,7 +51,9 @@ export const StatusManagerView = {
               </form>
               <div class="mt-4">
                 <h6 class="fw-semibold">Status cadastrados</h6>
+
                 <p class="text-muted small mb-2">Arraste os status para definir a ordem do fluxo.</p>
+
                 <div data-status-list class="list-group"></div>
               </div>
             </div>
@@ -64,7 +68,9 @@ export const StatusManagerView = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
     this.modalEl = document.getElementById('statusManagerModal');
+
     this._ensureModalInstance();
+
     this.listEl = this.modalEl.querySelector('[data-status-list]');
     this.formEl = this.modalEl.querySelector('#statusManagerForm');
     this.inputEl = this.modalEl.querySelector('#statusManagerInput');
@@ -82,6 +88,7 @@ export const StatusManagerView = {
   },
 
   open() {
+
     if (!this._ensureModalInstance()) {
       if (!this.pendingOpen && document.readyState !== 'complete') {
         this.pendingOpen = true;
@@ -97,6 +104,7 @@ export const StatusManagerView = {
     }
 
     this.pendingOpen = false;
+
     this.render();
     this.modal.show();
   },
@@ -153,8 +161,10 @@ export const StatusManagerView = {
       countBadge.className = 'badge bg-light text-dark';
       countBadge.textContent = `${count} tarefa${count === 1 ? '' : 's'}`;
 
+
       infoContainer.appendChild(dragHandle);
       infoContainer.appendChild(orderBadge);
+
       infoContainer.appendChild(badge);
       infoContainer.appendChild(code);
       infoContainer.appendChild(countBadge);
@@ -165,10 +175,12 @@ export const StatusManagerView = {
       const renameBtn = document.createElement('button');
       renameBtn.type = 'button';
       renameBtn.className = 'btn btn-outline-secondary';
+
       renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i><span class="visually-hidden">Renomear</span>';
       renameBtn.setAttribute('aria-label', 'Renomear status');
       renameBtn.title = 'Renomear';
       renameBtn.draggable = false;
+
       renameBtn.addEventListener('click', () => {
         this._handleRenameStatus(status);
       });
@@ -177,7 +189,9 @@ export const StatusManagerView = {
       deleteBtn.type = 'button';
       deleteBtn.className = 'btn btn-outline-danger';
       deleteBtn.textContent = 'Excluir';
+
       deleteBtn.draggable = false;
+
       deleteBtn.addEventListener('click', () => {
         this._handleRemoveStatus(status);
       });
@@ -234,12 +248,15 @@ export const StatusManagerView = {
       duplicate: 'Já existe um status com esse nome.',
       unchanged: 'O status já possui esse nome.',
       notfound: 'Status não encontrado.',
+
       minimum: 'Mantenha pelo menos um status cadastrado.',
       order: 'Não foi possível reordenar os status.'
+
     };
 
     const message = messages[reason] || 'Não foi possível completar a ação.';
     ToastView.show(message, 'danger');
+
   },
 
   _ensureModalInstance() {
@@ -267,6 +284,7 @@ export const StatusManagerView = {
     }
 
     return false;
+
   },
 
   _setupDragAndDrop() {
@@ -358,5 +376,6 @@ export const StatusManagerView = {
 
       return closest;
     }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+
   }
 };

@@ -54,6 +54,10 @@ export const TaskDetailView = {
                 <div class="d-flex flex-wrap gap-2" data-detail="tags"></div>
               </div>
               <div class="mt-3">
+                <h6 class="fw-bold">Dependências</h6>
+                <div class="d-flex flex-column gap-2" data-detail="dependencies"></div>
+              </div>
+              <div class="mt-3">
                 <h6 class="fw-bold">Notas</h6>
                 <p class="mb-0" data-detail="notes"></p>
               </div>
@@ -133,6 +137,7 @@ export const TaskDetailView = {
       this._populateStatusSelect();
       this._updateStatusBadge(TaskModel.getDefaultStatusId());
     });
+
   },
 
   open(task) {
@@ -186,6 +191,7 @@ export const TaskDetailView = {
     }
 
     this.setText('notes', task.notes || 'Sem notas');
+    this._renderDependencies(task.dependencies);
   },
 
   clearDetails() {

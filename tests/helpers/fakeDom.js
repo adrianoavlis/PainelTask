@@ -175,6 +175,12 @@ class FakeDocument {
       const matches = form.findDescendants(el => el.tagName === 'SELECT' && (el.name === 'topic' || el.getAttribute('name') === 'topic'));
       return matches[0] || null;
     }
+    if (selector === '#taskForm select[name="dependencies"]') {
+      const form = this.getElementById('taskForm');
+      if (!form) return null;
+      const matches = form.findDescendants(el => el.tagName === 'SELECT' && (el.name === 'dependencies' || el.getAttribute('name') === 'dependencies'));
+      return matches[0] || null;
+    }
     if (selector === '#tab-topics .nav-link.active') {
       const links = this.querySelectorAll('#tab-topics .nav-link');
       return links.find(link => link.classList.contains('active')) || null;
