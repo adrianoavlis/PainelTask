@@ -585,11 +585,14 @@ footer {
 }
 
 .task-detail-modal {
+  display: flex;
+  flex-direction: column;
   border: none;
   border-radius: 1.5rem;
   overflow: hidden;
   background: linear-gradient(180deg, #f9fafe 0%, #ffffff 100%);
   box-shadow: 0 2rem 3.5rem rgba(12, 21, 56, 0.25);
+  max-height: calc(100vh - 2rem);
 }
 
 .task-detail-modal__hero {
@@ -600,6 +603,7 @@ footer {
   padding: 2.25rem 2.5rem 1.75rem;
   background: linear-gradient(135deg, #050b2c 0%, #162a72 58%, #2f48a1 100%);
   color: #f8faff;
+  flex-shrink: 0;
 }
 
 .task-detail-modal__hero::before {
@@ -740,6 +744,10 @@ footer {
   padding: 2rem 2.5rem;
   display: grid;
   gap: 1.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .task-detail-modal__section {
@@ -840,6 +848,7 @@ footer {
   padding: 1.75rem 2.5rem 2rem;
   border-top: 1px solid #e7ecff;
   background: #ffffff;
+  flex-shrink: 0;
 }
 
 .task-detail-modal__footer .btn {
@@ -1212,8 +1221,6 @@ footer {
 @media (max-width: 575.98px) {
   .task-detail-modal {
     max-height: calc(100vh - 1rem);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   .task-detail-modal__hero,
