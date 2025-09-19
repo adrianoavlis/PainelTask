@@ -9,34 +9,7 @@ body {
 }
 
 .calendar-day-cell {
-  height: 160px;
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  overflow: hidden;
-}
-
-.calendar-day-header {
-  flex: 0 0 auto;
-}
-
-.calendar-day-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.calendar-day-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.calendar-day-content::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+  min-height: 120px;
 }
 
 .calendar-day-cell .badge {
