@@ -16,15 +16,21 @@
         <img src="./assets/img/logo-mestra-anos.png" alt="25 anos Mestra Informática" class="brand-logo brand-logo--anniversary" />
       </div>
       <div class="app-header__actions">
-      <button id="import-json" class="btn btn-outline-light btn-sm">Importar JSON</button>
-      <button id="import-ics" class="btn btn-outline-light btn-sm">Importar ICS</button>
-      <button id="export-json" class="btn btn-outline-light btn-sm">Exportar JSON</button>
-      <button id="export-ics" class="btn btn-outline-light btn-sm">Exportar ICS</button>
-      <button id="manage-collaborators" class="btn btn-outline-success btn-sm">Gerenciar Colaboradores</button>
-      <button id="manage-topics" class="btn btn-outline-info btn-sm">Gerenciar Assuntos</button>
-      <button id="toggle-mode" class="btn btn-outline-warning btn-sm">Modo: Local</button>
-      <input type="file" id="json-file" accept=".json" hidden />
-      <input type="file" id="ics-file" accept=".ics,text/calendar" hidden />
+        <button id="header-menu-toggle" class="btn btn-outline-light btn-sm app-header__menu-toggle" type="button" aria-expanded="false" aria-controls="app-header-actions-group">
+          <span class="app-header__menu-icon" aria-hidden="true"></span>
+          <span class="app-header__menu-label">Menu</span>
+        </button>
+        <div class="app-header__actions-group" id="app-header-actions-group" data-header-actions>
+          <button id="import-json" class="btn btn-outline-light btn-sm">Importar JSON</button>
+          <button id="import-ics" class="btn btn-outline-light btn-sm">Importar ICS</button>
+          <button id="export-json" class="btn btn-outline-light btn-sm">Exportar JSON</button>
+          <button id="export-ics" class="btn btn-outline-light btn-sm">Exportar ICS</button>
+          <button id="manage-collaborators" class="btn btn-outline-success btn-sm">Gerenciar Colaboradores</button>
+          <button id="manage-topics" class="btn btn-outline-info btn-sm">Gerenciar Assuntos</button>
+          <button id="toggle-mode" class="btn btn-outline-warning btn-sm">Modo: Local</button>
+          <input type="file" id="json-file" accept=".json" hidden />
+          <input type="file" id="ics-file" accept=".ics,text/calendar" hidden />
+        </div>
       </div>
     </div>
   </header>
