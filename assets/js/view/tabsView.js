@@ -1,26 +1,19 @@
 import { EventBus } from '../core/eventBus.js';
 
 export const TabsView = {
-  render(payload) {
-    const { topics, forcedActive } = Array.isArray(payload)
-      ? { topics: payload, forcedActive: null }
-      : { topics: payload?.topics ?? [], forcedActive: payload?.forcedActive ?? null };
-
+  render(topics) {
     const ul = document.getElementById('tab-topics');
-    const previousActive = document.querySelector('#tab-topics .nav-link.active')?.dataset.topic;
     ul.innerHTML = '';
 
     const allTopics = ['Todos', ...topics];
-    const currentActive = forcedActive || previousActive;
-    const activeTopic = allTopics.includes(currentActive) ? currentActive : allTopics[0];
+    let firstTopic = allTopics[0];
 
     allTopics.forEach((topic, index) => {
       const li = document.createElement('li');
       li.className = 'nav-item';
 
       const a = document.createElement('a');
-      const isActive = topic === activeTopic || (!activeTopic && index === 0);
-      a.className = 'nav-link' + (isActive ? ' active' : '');
+      a.className = 'nav-link' + (index === 0 ? ' active' : '');
       a.dataset.topic = topic;
       a.href = '#';
       a.textContent = topic;
@@ -36,16 +29,12 @@ export const TabsView = {
       ul.appendChild(li);
     });
 
-    if (activeTopic) {
-      EventBus.emit('topicSelected', activeTopic);
+    if (firstTopic) {
+      EventBus.emit('topicSelected', firstTopic);
     }
   }
 };
 
 EventBus.on('dataLoaded', (data) => {
   TabsView.render(data.topics);
-});
-
-EventBus.on('topicsChanged', (payload) => {
-  TabsView.render(payload);
 });

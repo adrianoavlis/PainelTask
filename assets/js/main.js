@@ -7,7 +7,6 @@ import { ModalView } from './view/modalView.js';
 import { ListView } from './view/listView.js';
 import { TaskDetailView } from './view/taskDetailView.js';
 import { ToastView } from './view/toastView.js';
-import { TopicManagerView } from './view/topicManagerView.js';
 import { ExportUtils } from './core/exportUtils.js';
 import { ICSUtils } from './core/icsUtils.js';
 import { EventBus } from './core/eventBus.js';
@@ -15,8 +14,7 @@ import { EventBus } from './core/eventBus.js';
 document.addEventListener('DOMContentLoaded', async () => {
   ToastView.init();
   ModalView.init();
-
-  TopicManagerView.init();
+  TaskDetailView.init();
 
   const modeToggleBtn = document.getElementById('toggle-mode');
   const importBtn = document.getElementById('import-json');

@@ -116,9 +116,3 @@ EventBus.on('taskRemoved', () => {
   const topic = activeTab?.dataset.topic || 'Todos';
   ListView.render(topic);
 });
-
-EventBus.on('tasksBulkUpdated', () => {
-  const activeTab = document.querySelector('#tab-topics .nav-link.active');
-  const topic = activeTab?.dataset.topic || 'Todos';
-  ListView.render(topic);
-});
