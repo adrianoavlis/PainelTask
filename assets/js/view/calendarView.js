@@ -40,7 +40,7 @@ export const CalendarView = {
     container.innerHTML = '';
 
     const card = document.createElement('div');
-    card.className = 'card shadow-sm';
+    card.className = 'calendar-card card';
 
     card.appendChild(this._buildHeader());
     card.appendChild(this._buildCalendarBody());
@@ -50,11 +50,11 @@ export const CalendarView = {
 
   _buildHeader() {
     const header = document.createElement('div');
-    header.className = 'card-header d-flex justify-content-between align-items-center';
+    header.className = 'calendar-card__header card-header d-flex justify-content-between align-items-center';
 
     const prevBtn = document.createElement('button');
     prevBtn.type = 'button';
-    prevBtn.className = 'btn btn-sm btn-outline-secondary';
+    prevBtn.className = 'btn btn-sm';
     prevBtn.textContent = '‹ Mês anterior';
     prevBtn.addEventListener('click', () => {
       this.render(addMonths(this.currentMonth, -1), this.currentTopic);
@@ -67,7 +67,7 @@ export const CalendarView = {
 
     const nextBtn = document.createElement('button');
     nextBtn.type = 'button';
-    nextBtn.className = 'btn btn-sm btn-outline-secondary';
+    nextBtn.className = 'btn btn-sm';
     nextBtn.textContent = 'Próximo mês ›';
     nextBtn.addEventListener('click', () => {
       this.render(addMonths(this.currentMonth, 1), this.currentTopic);
@@ -82,10 +82,10 @@ export const CalendarView = {
 
   _buildCalendarBody() {
     const body = document.createElement('div');
-    body.className = 'card-body p-0';
+    body.className = 'calendar-card__body card-body';
 
     const table = document.createElement('table');
-    table.className = 'table table-bordered table-sm mb-0 calendar-table align-middle';
+    table.className = 'table calendar-table align-middle';
 
     table.appendChild(this._buildTableHead());
     table.appendChild(this._buildTableBody());
