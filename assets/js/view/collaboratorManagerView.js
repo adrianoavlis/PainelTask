@@ -134,7 +134,9 @@ export const CollaboratorManagerView = {
       const deleteBtn = document.createElement('button');
       deleteBtn.type = 'button';
       deleteBtn.className = 'btn btn-outline-danger';
-      deleteBtn.textContent = 'Excluir';
+      deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i><span class="visually-hidden">Excluir</span>';
+      deleteBtn.setAttribute('aria-label', 'Excluir colaborador');
+      deleteBtn.title = 'Excluir';
       deleteBtn.addEventListener('click', () => {
         this._handleRemoveCollaborator(collaborator);
       });

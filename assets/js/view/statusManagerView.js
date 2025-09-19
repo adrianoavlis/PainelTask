@@ -188,7 +188,9 @@ export const StatusManagerView = {
       const deleteBtn = document.createElement('button');
       deleteBtn.type = 'button';
       deleteBtn.className = 'btn btn-outline-danger';
-      deleteBtn.textContent = 'Excluir';
+      deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i><span class="visually-hidden">Excluir</span>';
+      deleteBtn.setAttribute('aria-label', 'Excluir status');
+      deleteBtn.title = 'Excluir';
 
       deleteBtn.draggable = false;
 
