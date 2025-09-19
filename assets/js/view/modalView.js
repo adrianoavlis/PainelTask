@@ -26,6 +26,10 @@ export const ModalView = {
                 <select class="form-select" name="topic" required></select>
               </div>
               <div class="col-md-6">
+                <label class="form-label">Colaborador</label>
+                <select class="form-select" name="collaborator"></select>
+              </div>
+              <div class="col-md-6">
                 <label class="form-label">Data de Início</label>
                 <input type="date" class="form-control" name="startDate">
               </div>
@@ -61,6 +65,7 @@ export const ModalView = {
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     this.updateTopicOptions();
+    this.updateCollaboratorOptions();
 
     this.form = document.getElementById('taskForm');
     const modalEl = document.getElementById('taskModal');
@@ -80,6 +85,7 @@ export const ModalView = {
           .map(tag => tag.trim())
           .filter(tag => tag.length > 0)
         : [];
+      data.collaborator = data.collaborator ? data.collaborator : null;
 
       if (this.currentTask) {
         const existingTask = TaskModel.getTaskById(this.currentTask.id);
@@ -108,9 +114,20 @@ export const ModalView = {
     select.innerHTML = options;
   },
 
+  updateCollaboratorOptions() {
+    const select = document.querySelector('#taskForm select[name="collaborator"]');
+    if (!select) return;
+    const collaborators = TaskModel.getCollaborators();
+    const options = [`<option value="">Sem colaborador</option>`]
+      .concat(collaborators.map(collaborator => `<option value="${collaborator}">${collaborator}</option>`))
+      .join('');
+    select.innerHTML = options;
+  },
+
   open(task = null) {
     this.currentTask = task ? { ...task } : null;
     this.updateTopicOptions();
+    this.updateCollaboratorOptions();
     this.form.reset();
 
     const title = document.getElementById('taskModalLabel');
@@ -131,6 +148,14 @@ export const ModalView = {
   fillForm(task) {
     this.form.querySelector('input[name="title"]').value = task.title || '';
     this.form.querySelector('select[name="topic"]').value = task.topic || '';
+    const collaboratorSelect = this.form.querySelector('select[name="collaborator"]');
+    if (collaboratorSelect) {
+      const options = Array.from(collaboratorSelect.options).map(option => option.value);
+      const value = task.collaborator && options.includes(task.collaborator)
+        ? task.collaborator
+        : '';
+      collaboratorSelect.value = value;
+    }
     this.form.querySelector('input[name="startDate"]').value = task.startDate || '';
     this.form.querySelector('input[name="dueDate"]').value = task.dueDate || '';
     this.form.querySelector('select[name="priority"]').value = task.priority || 'low';
@@ -151,4 +176,6 @@ EventBus.on('dataLoaded', () => ModalView.updateTopicOptions());
 EventBus.on('taskAdded', () => ModalView.updateTopicOptions());
 EventBus.on('taskUpdated', () => ModalView.updateTopicOptions());
 EventBus.on('topicsChanged', () => ModalView.updateTopicOptions());
+EventBus.on('dataLoaded', () => ModalView.updateCollaboratorOptions());
+EventBus.on('collaboratorsChanged', () => ModalView.updateCollaboratorOptions());
 EventBus.on('openTaskModal', (task) => ModalView.open(task));
