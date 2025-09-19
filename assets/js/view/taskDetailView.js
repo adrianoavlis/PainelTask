@@ -138,21 +138,6 @@ export const TaskDetailView = {
       this._updateStatusBadge(TaskModel.getDefaultStatusId());
     });
 
-    EventBus.on('tasksBulkUpdated', () => {
-      this._refreshCurrentTask();
-    });
-
-    EventBus.on('taskRemoved', (removedTask) => {
-      if (removedTask && this.currentTask?.id === removedTask.id) {
-        this.modal.hide();
-        return;
-      }
-      this._refreshCurrentTask();
-    });
-
-    EventBus.on('taskUpdated', () => {
-      this._refreshCurrentTask();
-    });
   },
 
   open(task) {
@@ -273,64 +258,6 @@ export const TaskDetailView = {
     const defaultStatus = TaskModel.getDefaultStatusId();
     const statusToSelect = statuses.find(status => status.id === selectedId)?.id || defaultStatus;
     statusSelect.value = statusToSelect;
-  },
 
-  _renderDependencies(dependencyIds) {
-    const container = this.modalEl.querySelector('[data-detail="dependencies"]');
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML = '';
-
-    if (!Array.isArray(dependencyIds) || dependencyIds.length === 0) {
-      const empty = document.createElement('span');
-      empty.className = 'text-muted';
-      empty.textContent = 'Sem dependências registradas';
-      container.appendChild(empty);
-      return;
-    }
-
-    dependencyIds.forEach(depId => {
-      const dependencyTask = TaskModel.getTaskById(depId);
-      const item = document.createElement('div');
-      item.className = 'd-flex flex-wrap align-items-center gap-2';
-
-      const titleBadge = document.createElement('span');
-      titleBadge.className = 'badge bg-light text-dark';
-      titleBadge.textContent = dependencyTask?.title || 'Atividade indisponível';
-      item.appendChild(titleBadge);
-
-      if (dependencyTask) {
-        const status = TaskModel.getStatusById(dependencyTask.status);
-        if (status) {
-          const statusBadge = document.createElement('span');
-          statusBadge.className = `badge ${status.badgeClass || 'text-bg-secondary'}`;
-          statusBadge.textContent = status.label;
-          item.appendChild(statusBadge);
-        }
-      } else {
-        const missing = document.createElement('span');
-        missing.className = 'text-muted small';
-        missing.textContent = 'Removida ou não encontrada';
-        item.appendChild(missing);
-      }
-
-      container.appendChild(item);
-    });
-  },
-
-  _refreshCurrentTask() {
-    if (!this.currentTask) {
-      return;
-    }
-
-    const latest = TaskModel.getTaskById(this.currentTask.id);
-    if (!latest) {
-      return;
-    }
-
-    this.currentTask = { ...latest };
-    this.fillDetails(this.currentTask);
   }
 };

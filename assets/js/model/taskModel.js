@@ -124,6 +124,9 @@ export const TaskModel = {
 
     this.data.statuses = normalizedStatuses;
 
+    this._applyStatusOrderMetadata();
+
+
     if (this.data.topics.length === 0) {
       this.data.topics.push(FALLBACK_TOPIC);
     }
@@ -181,10 +184,7 @@ export const TaskModel = {
     task.topic = topic;
     task.collaborator = this._resolveExistingCollaborator(task.collaborator) || null;
     task.status = this._normalizeStatusId(task.status);
-    task.dependencies = this._normalizeDependencies(task.dependencies, {
-      excludeId: task.id,
-      validIds: new Set(this.data.tasks.map(existingTask => existingTask.id))
-    });
+
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
 
@@ -286,26 +286,13 @@ export const TaskModel = {
       return;
     }
 
-    const existingTask = this.data.tasks[index];
-    const mergedTask = {
-      ...existingTask,
-      ...updatedTask
-    };
 
-    const topic = this._resolveExistingTopic(mergedTask.topic) || this.data.topics[0] || FALLBACK_TOPIC;
+      updatedTask.topic = topic;
+      updatedTask.collaborator = this._resolveExistingCollaborator(updatedTask.collaborator) || null;
+      updatedTask.status = this._normalizeStatusId(updatedTask.status);
+      updatedTask.updatedAt = nowISO();
+      this.data.tasks[index] = updatedTask;
 
-    mergedTask.topic = topic;
-    mergedTask.collaborator = this._resolveExistingCollaborator(mergedTask.collaborator) || null;
-    mergedTask.status = this._normalizeStatusId(mergedTask.status);
-    mergedTask.tags = Array.isArray(mergedTask.tags) ? mergedTask.tags : [];
-    mergedTask.dependencies = this._normalizeDependencies(
-      Array.isArray(updatedTask.dependencies) ? updatedTask.dependencies : existingTask.dependencies,
-      {
-        excludeId: existingTask.id,
-        validIds: new Set(this.data.tasks.map(task => task.id))
-      }
-    );
-    mergedTask.updatedAt = nowISO();
 
     this.data.tasks[index] = mergedTask;
 
@@ -461,6 +448,9 @@ export const TaskModel = {
     };
 
     this.data.statuses.push(status);
+
+    this._applyStatusOrderMetadata();
+
     this.persist();
 
     EventBus.emit('statusAdded', { ...status });
@@ -491,6 +481,9 @@ export const TaskModel = {
 
     const previousLabel = status.label;
     status.label = normalizedLabel;
+
+    this._applyStatusOrderMetadata();
+
 
     this.persist();
 
@@ -524,6 +517,9 @@ export const TaskModel = {
 
     this.data.statuses = remaining;
 
+    this._applyStatusOrderMetadata();
+
+
     let reassignedCount = 0;
     const now = nowISO();
     this.data.tasks.forEach(task => {
@@ -549,6 +545,54 @@ export const TaskModel = {
 
     return { success: true, fallback, reassignedCount };
   },
+
+
+  reorderStatuses(orderIds) {
+    if (!Array.isArray(this.data.statuses) || this.data.statuses.length === 0) {
+      return { success: true, reordered: false };
+    }
+
+    if (!Array.isArray(orderIds) || orderIds.length !== this.data.statuses.length) {
+      return { success: false, reason: 'order' };
+    }
+
+    const normalizedOrder = orderIds
+      .map(id => (typeof id === 'string' ? id.trim() : ''))
+      .filter(Boolean);
+
+    if (normalizedOrder.length !== this.data.statuses.length) {
+      return { success: false, reason: 'order' };
+    }
+
+    const uniqueOrder = [...new Set(normalizedOrder)];
+    if (uniqueOrder.length !== this.data.statuses.length) {
+      return { success: false, reason: 'order' };
+    }
+
+    const statusMap = new Map(this.data.statuses.map(status => [status.id, status]));
+
+    for (const id of uniqueOrder) {
+      if (!statusMap.has(id)) {
+        return { success: false, reason: 'order' };
+      }
+    }
+
+    const unchanged = this.data.statuses.every((status, index) => status.id === uniqueOrder[index]);
+    if (unchanged) {
+      return { success: true, reordered: false };
+    }
+
+    this.data.statuses = uniqueOrder.map(id => statusMap.get(id));
+    this._applyStatusOrderMetadata();
+
+    this.persist();
+
+    EventBus.emit('statusesReordered', [...this.data.statuses]);
+    EventBus.emit('statusesChanged', [...this.data.statuses]);
+
+    return { success: true, reordered: true };
+  },
+
 
   addTopic(name) {
     const topic = normalizeTopicName(name);
@@ -675,7 +719,6 @@ export const TaskModel = {
     const validTopics = new Set(this.data.topics);
     const validCollaborators = new Set(this.data.collaborators);
     const validStatuses = new Set(this.data.statuses.map(status => status.id));
-    const validTaskIds = new Set(this.data.tasks.map(task => task.id));
 
     const fallbackTopic = this.data.topics[0];
     const fallbackStatus = this.getDefaultStatusId();
@@ -721,10 +764,29 @@ export const TaskModel = {
       }
     });
 
+    this._applyStatusOrderMetadata();
+
     if (needsPersist) {
       this.persist();
     }
   },
+
+
+  _applyStatusOrderMetadata() {
+    if (!Array.isArray(this.data.statuses)) {
+      return;
+    }
+
+    this.data.statuses.forEach((status, index) => {
+      const previous = index > 0 ? this.data.statuses[index - 1] : null;
+      const next = index < this.data.statuses.length - 1 ? this.data.statuses[index + 1] : null;
+
+      status.order = index;
+      status.previousId = previous ? previous.id : null;
+      status.nextId = next ? next.id : null;
+    });
+  },
+
 
   _normalizeStatusDefinition(status) {
     if (!status) {
@@ -815,61 +877,6 @@ export const TaskModel = {
     const fallback = { ...DEFAULT_STATUSES[0] };
     this.data.statuses.push(fallback);
     return fallback.id;
-  },
 
-  _normalizeDependencies(dependencies, { excludeId = null, validIds = null } = {}) {
-    if (!Array.isArray(dependencies)) {
-      return [];
-    }
-
-    const referenceIds = validIds || new Set(this.data.tasks.map(task => task.id));
-    const normalized = [];
-    const seen = new Set();
-
-    dependencies.forEach(candidate => {
-      if (typeof candidate !== 'string') {
-        return;
-      }
-
-      const trimmed = candidate.trim();
-      if (!trimmed) {
-        return;
-      }
-
-      if (excludeId && trimmed === excludeId) {
-        return;
-      }
-
-      if (!referenceIds.has(trimmed)) {
-        return;
-      }
-
-      if (seen.has(trimmed)) {
-        return;
-      }
-
-      seen.add(trimmed);
-      normalized.push(trimmed);
-    });
-
-    return normalized;
-  },
-
-  _areArraysEqual(a, b) {
-    if (!Array.isArray(a) || !Array.isArray(b)) {
-      return Array.isArray(a) === Array.isArray(b) && (Array.isArray(a) ? a.length : 0) === (Array.isArray(b) ? b.length : 0);
-    }
-
-    if (a.length !== b.length) {
-      return false;
-    }
-
-    for (let index = 0; index < a.length; index += 1) {
-      if (a[index] !== b[index]) {
-        return false;
-      }
-    }
-
-    return true;
   }
 };
