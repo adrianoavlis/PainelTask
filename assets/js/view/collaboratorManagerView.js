@@ -112,19 +112,24 @@ export const CollaboratorManagerView = {
 
     collaborators.forEach(collaborator => {
       const item = document.createElement('div');
-      item.className = 'list-group-item d-flex justify-content-between align-items-center';
+      item.className = 'list-group-item d-flex justify-content-between align-items-center gap-3 flex-wrap';
 
       const title = document.createElement('span');
       title.textContent = collaborator;
-      title.className = 'me-3';
+      title.className = 'me-3 flex-grow-1';
 
       const actions = document.createElement('div');
-      actions.className = 'btn-group btn-group-sm';
+      actions.className = 'app-circle-action-group flex-shrink-0';
 
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
-      editBtn.className = 'btn btn-outline-secondary';
-      editBtn.innerHTML = '<i class="fa-solid fa-pen"></i><span class="visually-hidden">Renomear</span>';
+      editBtn.className = 'app-circle-action app-circle-action--edit';
+      editBtn.innerHTML = `
+        <span class="app-circle-action__icon" aria-hidden="true">
+          <i class="fa-solid fa-pen"></i>
+          <small>Editar</small>
+        </span>
+      `.trim();
       editBtn.setAttribute('aria-label', 'Renomear colaborador');
       editBtn.title = 'Renomear';
       editBtn.addEventListener('click', () => {
@@ -133,8 +138,13 @@ export const CollaboratorManagerView = {
 
       const deleteBtn = document.createElement('button');
       deleteBtn.type = 'button';
-      deleteBtn.className = 'btn btn-outline-danger';
-      deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i><span class="visually-hidden">Excluir</span>';
+      deleteBtn.className = 'app-circle-action app-circle-action--delete';
+      deleteBtn.innerHTML = `
+        <span class="app-circle-action__icon" aria-hidden="true">
+          <i class="fa-solid fa-trash"></i>
+          <small>Excluir</small>
+        </span>
+      `.trim();
       deleteBtn.setAttribute('aria-label', 'Excluir colaborador');
       deleteBtn.title = 'Excluir';
       deleteBtn.addEventListener('click', () => {
