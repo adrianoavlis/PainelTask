@@ -20,9 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const modeToggleBtn = document.getElementById('toggle-mode');
   const importBtn = document.getElementById('import-json');
+  const importICSBtn = document.getElementById('import-ics');
   const exportBtn = document.getElementById('export-json');
   const exportICSBtn = document.getElementById('export-ics');
   const fileInput = document.getElementById('json-file');
+  const icsFileInput = document.getElementById('ics-file');
 
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode') || 'local';
@@ -49,6 +51,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     fileInput.click();
   });
 
+  importICSBtn.addEventListener('click', () => {
+    icsFileInput.click();
+  });
+
   fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -65,6 +71,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
       console.error(err);
       ToastView.show('Erro ao importar JSON.', 'danger');
+    }
+  });
+
+  icsFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const { count } = await ICSUtils.importICS(file);
+
+      if (count > 0) {
+        ToastView.show(`${count} evento(s) importado(s) do ICS!`, 'success');
+        window.location.reload();
+      } else {
+        ToastView.show('Nenhum evento válido encontrado no arquivo ICS.', 'info');
+      }
+    } catch (err) {
+      console.error(err);
+      ToastView.show('Erro ao importar ICS.', 'danger');
+    } finally {
+      e.target.value = '';
     }
   });
 

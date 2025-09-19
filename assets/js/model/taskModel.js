@@ -64,6 +64,84 @@ export const TaskModel = {
     EventBus.emit('taskAdded', task);
   },
 
+  importTasks(tasks) {
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return [];
+    }
+
+    if (!Array.isArray(this.data.topics) || this.data.topics.length === 0) {
+      this.data.topics = [FALLBACK_TOPIC];
+    }
+
+    const defaultTopic = this.data.topics[0] || FALLBACK_TOPIC;
+    const allowedStatuses = new Set(['todo', 'doing', 'done']);
+    const now = nowISO();
+    const baseTime = Date.now();
+    const imported = [];
+
+    tasks.forEach((incomingTask, index) => {
+      if (!incomingTask || typeof incomingTask !== 'object') {
+        return;
+      }
+
+      const title = typeof incomingTask.title === 'string' && incomingTask.title.trim()
+        ? incomingTask.title.trim()
+        : null;
+
+      const startDate = incomingTask.startDate || incomingTask.dueDate || null;
+      const dueDate = incomingTask.dueDate || incomingTask.startDate || null;
+
+      if (!title || !dueDate) {
+        return;
+      }
+
+      const topic = this._resolveExistingTopic(incomingTask.topic) || defaultTopic;
+      const status = allowedStatuses.has(incomingTask.status) ? incomingTask.status : 'todo';
+      const priority = typeof incomingTask.priority === 'string' && incomingTask.priority.trim()
+        ? incomingTask.priority
+        : 'medium';
+
+      const tags = Array.isArray(incomingTask.tags)
+        ? incomingTask.tags.filter(tag => typeof tag === 'string')
+        : [];
+
+      const checklist = Array.isArray(incomingTask.checklist)
+        ? incomingTask.checklist.filter(item => item && typeof item.text === 'string').map(item => ({
+          text: item.text,
+          done: Boolean(item.done)
+        }))
+        : [];
+
+      const task = {
+        id: `t-${baseTime + index}`,
+        title,
+        topic,
+        status,
+        priority,
+        startDate,
+        dueDate,
+        allDay: Boolean(incomingTask.allDay),
+        repeat: incomingTask.repeat ?? null,
+        tags,
+        notes: typeof incomingTask.notes === 'string' ? incomingTask.notes : '',
+        checklist,
+        createdAt: now,
+        updatedAt: now
+      };
+
+      this.data.tasks.push(task);
+      imported.push(task);
+    });
+
+    if (imported.length > 0) {
+      this.persist();
+      EventBus.emit('tasksImported', { tasks: imported });
+      EventBus.emit('tasksBulkUpdated', [...this.data.tasks]);
+    }
+
+    return imported;
+  },
+
   updateTask(updatedTask) {
     const index = this.data.tasks.findIndex(t => t.id === updatedTask.id);
     if (index !== -1) {
