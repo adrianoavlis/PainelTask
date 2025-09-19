@@ -2,21 +2,18 @@
 body {
   background-color: #f8f9fa;
 }
-#calendar-view {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
+
+.calendar-table th,
+.calendar-table td {
+  width: 14.285%;
 }
-.calendar-cell {
-  background-color: white;
-  border: 1px solid #dee2e6;
-  min-height: 100px;
-  padding: 0.5rem;
-  border-radius: 0.25rem;
+
+.calendar-day-cell {
+  min-height: 120px;
 }
-.calendar-cell .date {
-  font-weight: bold;
-  font-size: 0.9rem;
+
+.calendar-day-cell .badge {
+  white-space: normal;
 }
 
 .task-card {

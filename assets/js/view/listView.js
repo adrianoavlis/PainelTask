@@ -34,6 +34,7 @@ export const ListView = {
 
       filtered.filter(t => t.status === status).forEach(task => {
         const card = document.createElement('div');
+
         card.className = 'card mb-2 task-card';
         card.tabIndex = 0;
         card.setAttribute('role', 'button');

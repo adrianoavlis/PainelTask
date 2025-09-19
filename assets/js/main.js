@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.body.appendChild(fab);
 
   EventBus.on('topicSelected', topic => {
-    CalendarView.render();
+    CalendarView.render(CalendarView.currentMonth, topic);
     ListView.render(topic);
   });
 
