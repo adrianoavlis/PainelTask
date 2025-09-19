@@ -1,6 +1,26 @@
 
+html {
+  height: 100%;
+}
+
 body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: #f8f9fa;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+main {
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+footer {
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .app-header {
