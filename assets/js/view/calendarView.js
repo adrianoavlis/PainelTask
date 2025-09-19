@@ -229,10 +229,15 @@ export const CalendarView = {
   },
 
   _formatTaskLabel(task) {
-    if (this.currentTopic === 'Todos' && task.topic) {
-      return `${task.topic} · ${task.title}`;
+    const baseLabel = this.currentTopic === 'Todos' && task.topic
+      ? `${task.topic} · ${task.title}`
+      : task.title;
+
+    if (Array.isArray(task.dependencies) && task.dependencies.length > 0) {
+      return `${baseLabel} ⛓`;
     }
-    return task.title;
+
+    return baseLabel;
   },
 
   _formatTaskPeriod(task) {

@@ -224,4 +224,88 @@ test('ToastView exibe e remove automaticamente a notificação', () => {
   restoreEvents(BASE_EVENTS);
 });
 
+test('TaskModel.updateTask normaliza dependências inválidas', () => {
+  restoreEvents(BASE_EVENTS);
+
+  const originalData = TaskModel.data;
+  const originalPersist = TaskModel.persist;
+  const originalEmit = EventBus.emit;
+
+  TaskModel.persist = () => {};
+  const emitted = [];
+  EventBus.emit = (event) => {
+    emitted.push(event);
+  };
+
+  TaskModel.data = {
+    meta: {},
+    topics: ['Geral'],
+    collaborators: [],
+    statuses: [
+      { id: 'todo', label: 'A Fazer', badgeClass: 'text-bg-secondary' },
+      { id: 'done', label: 'Concluído', badgeClass: 'text-bg-success' }
+    ],
+    tasks: [
+      { id: 't-1', title: 'Base', topic: 'Geral', status: 'todo', dependencies: [] },
+      { id: 't-2', title: 'Principal', topic: 'Geral', status: 'todo', dependencies: [] }
+    ]
+  };
+
+  TaskModel.updateTask({ id: 't-2', dependencies: ['t-1', 'inexistente', 't-1'], status: 'done' });
+
+  const updated = TaskModel.data.tasks.find(task => task.id === 't-2');
+  assert.deepEqual(updated.dependencies, ['t-1'], 'deve manter apenas dependências válidas e únicas');
+  assert.equal(updated.status, 'done', 'deve aplicar demais alterações da tarefa');
+  assert.equal(emitted.includes('taskUpdated'), true, 'deve emitir taskUpdated após atualização');
+
+  EventBus.emit = originalEmit;
+  TaskModel.persist = originalPersist;
+  TaskModel.data = originalData;
+  restoreEvents(BASE_EVENTS);
+});
+
+test('TaskModel.removeTask limpa dependências relacionadas', () => {
+  restoreEvents(BASE_EVENTS);
+
+  const originalData = TaskModel.data;
+  const originalPersist = TaskModel.persist;
+  const originalEmit = EventBus.emit;
+
+  TaskModel.persist = () => {};
+  const emitted = [];
+  EventBus.emit = (event, payload) => {
+    emitted.push({ event, payload });
+  };
+
+  TaskModel.data = {
+    meta: {},
+    topics: ['Geral'],
+    collaborators: [],
+    statuses: [
+      { id: 'todo', label: 'A Fazer', badgeClass: 'text-bg-secondary' },
+      { id: 'done', label: 'Concluído', badgeClass: 'text-bg-success' }
+    ],
+    tasks: [
+      { id: 't-1', title: 'Origem', topic: 'Geral', status: 'todo', dependencies: [] },
+      { id: 't-2', title: 'Dependente', topic: 'Geral', status: 'todo', dependencies: ['t-1'] },
+      { id: 't-3', title: 'Correlata', topic: 'Geral', status: 'todo', dependencies: ['t-1', 't-2'] }
+    ]
+  };
+
+  TaskModel.removeTask('t-1');
+
+  const dependent = TaskModel.data.tasks.find(task => task.id === 't-2');
+  const correlata = TaskModel.data.tasks.find(task => task.id === 't-3');
+
+  assert.deepEqual(dependent.dependencies, [], 'deve remover dependências que apontam para a tarefa excluída');
+  assert.deepEqual(correlata.dependencies, ['t-2'], 'deve manter dependências válidas existentes');
+  assert.equal(emitted.some(evt => evt.event === 'taskRemoved'), true, 'deve emitir taskRemoved');
+  assert.equal(emitted.some(evt => evt.event === 'tasksBulkUpdated'), true, 'deve emitir tasksBulkUpdated quando dependências são afetadas');
+
+  EventBus.emit = originalEmit;
+  TaskModel.persist = originalPersist;
+  TaskModel.data = originalData;
+  restoreEvents(BASE_EVENTS);
+});
+
 await runner.run();

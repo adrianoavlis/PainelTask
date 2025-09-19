@@ -83,6 +83,16 @@ export const ListView = {
           meta.appendChild(collaboratorBadge);
         }
 
+        if (Array.isArray(task.dependencies) && task.dependencies.length > 0) {
+          const dependencyBadge = document.createElement('span');
+          dependencyBadge.className = 'badge bg-light text-dark border';
+          const count = task.dependencies.length;
+          dependencyBadge.textContent = count === 1
+            ? '1 dependência'
+            : `${count} dependências`;
+          meta.appendChild(dependencyBadge);
+        }
+
         body.appendChild(title);
         body.appendChild(date);
         body.appendChild(meta);

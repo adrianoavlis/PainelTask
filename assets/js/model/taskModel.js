@@ -57,6 +57,37 @@ export const TaskModel = {
       this.data.tasks = [];
     }
 
+    const sanitizedTasks = [];
+    const usedIds = new Set();
+    const baseTime = Date.now();
+
+    this.data.tasks.forEach((task, index) => {
+      if (!task || typeof task !== 'object') {
+        return;
+      }
+
+      let id = typeof task.id === 'string' ? task.id.trim() : '';
+      if (!id) {
+        id = `t-${baseTime + index}`;
+      }
+
+      while (usedIds.has(id)) {
+        id = `t-${baseTime + index}-${usedIds.size}`;
+      }
+
+      usedIds.add(id);
+
+      const normalizedTask = {
+        ...task,
+        id,
+        dependencies: Array.isArray(task.dependencies) ? [...task.dependencies] : []
+      };
+
+      sanitizedTasks.push(normalizedTask);
+    });
+
+    this.data.tasks = sanitizedTasks;
+
     if (!Array.isArray(this.data.collaborators)) {
       this.data.collaborators = [];
     }
@@ -150,6 +181,10 @@ export const TaskModel = {
     task.topic = topic;
     task.collaborator = this._resolveExistingCollaborator(task.collaborator) || null;
     task.status = this._normalizeStatusId(task.status);
+    task.dependencies = this._normalizeDependencies(task.dependencies, {
+      excludeId: task.id,
+      validIds: new Set(this.data.tasks.map(existingTask => existingTask.id))
+    });
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
 
@@ -207,8 +242,14 @@ export const TaskModel = {
         }))
         : [];
 
+      const taskId = `t-${baseTime + index}`;
+      const dependencies = this._normalizeDependencies(incomingTask.dependencies, {
+        excludeId: taskId,
+        validIds: new Set(this.data.tasks.map(task => task.id))
+      });
+
       const task = {
-        id: `t-${baseTime + index}`,
+        id: taskId,
         title,
         topic,
         status,
@@ -221,6 +262,7 @@ export const TaskModel = {
         tags,
         notes: typeof incomingTask.notes === 'string' ? incomingTask.notes : '',
         checklist,
+        dependencies,
         createdAt: now,
         updatedAt: now
       };
@@ -240,26 +282,62 @@ export const TaskModel = {
 
   updateTask(updatedTask) {
     const index = this.data.tasks.findIndex(t => t.id === updatedTask.id);
-    if (index !== -1) {
-      const topic = this._resolveExistingTopic(updatedTask.topic) || this.data.topics[0] || FALLBACK_TOPIC;
-
-      updatedTask.topic = topic;
-      updatedTask.collaborator = this._resolveExistingCollaborator(updatedTask.collaborator) || null;
-      updatedTask.status = this._normalizeStatusId(updatedTask.status);
-      updatedTask.updatedAt = nowISO();
-      this.data.tasks[index] = updatedTask;
-
-      this.persist();
-      EventBus.emit('taskUpdated', updatedTask);
+    if (index === -1) {
+      return;
     }
+
+    const existingTask = this.data.tasks[index];
+    const mergedTask = {
+      ...existingTask,
+      ...updatedTask
+    };
+
+    const topic = this._resolveExistingTopic(mergedTask.topic) || this.data.topics[0] || FALLBACK_TOPIC;
+
+    mergedTask.topic = topic;
+    mergedTask.collaborator = this._resolveExistingCollaborator(mergedTask.collaborator) || null;
+    mergedTask.status = this._normalizeStatusId(mergedTask.status);
+    mergedTask.tags = Array.isArray(mergedTask.tags) ? mergedTask.tags : [];
+    mergedTask.dependencies = this._normalizeDependencies(
+      Array.isArray(updatedTask.dependencies) ? updatedTask.dependencies : existingTask.dependencies,
+      {
+        excludeId: existingTask.id,
+        validIds: new Set(this.data.tasks.map(task => task.id))
+      }
+    );
+    mergedTask.updatedAt = nowISO();
+
+    this.data.tasks[index] = mergedTask;
+
+    this.persist();
+    EventBus.emit('taskUpdated', mergedTask);
   },
 
   removeTask(id) {
     const index = this.data.tasks.findIndex(task => task.id === id);
     if (index !== -1) {
       const [removedTask] = this.data.tasks.splice(index, 1);
+
+      let clearedDependencies = 0;
+      const now = nowISO();
+      this.data.tasks.forEach(task => {
+        if (!Array.isArray(task.dependencies) || task.dependencies.length === 0) {
+          return;
+        }
+
+        if (task.dependencies.includes(removedTask.id)) {
+          task.dependencies = task.dependencies.filter(depId => depId !== removedTask.id);
+          task.updatedAt = now;
+          clearedDependencies++;
+        }
+      });
+
       this.persist();
       EventBus.emit('taskRemoved', removedTask);
+
+      if (clearedDependencies > 0) {
+        EventBus.emit('tasksBulkUpdated', [...this.data.tasks]);
+      }
     }
   },
 
@@ -597,6 +675,7 @@ export const TaskModel = {
     const validTopics = new Set(this.data.topics);
     const validCollaborators = new Set(this.data.collaborators);
     const validStatuses = new Set(this.data.statuses.map(status => status.id));
+    const validTaskIds = new Set(this.data.tasks.map(task => task.id));
 
     const fallbackTopic = this.data.topics[0];
     const fallbackStatus = this.getDefaultStatusId();
@@ -623,6 +702,16 @@ export const TaskModel = {
 
       if (task.collaborator && !validCollaborators.has(task.collaborator)) {
         task.collaborator = null;
+        updated = true;
+      }
+
+      const normalizedDependencies = this._normalizeDependencies(task.dependencies, {
+        excludeId: task.id,
+        validIds: validTaskIds
+      });
+
+      if (!this._areArraysEqual(task.dependencies, normalizedDependencies)) {
+        task.dependencies = normalizedDependencies;
         updated = true;
       }
 
@@ -726,5 +815,61 @@ export const TaskModel = {
     const fallback = { ...DEFAULT_STATUSES[0] };
     this.data.statuses.push(fallback);
     return fallback.id;
+  },
+
+  _normalizeDependencies(dependencies, { excludeId = null, validIds = null } = {}) {
+    if (!Array.isArray(dependencies)) {
+      return [];
+    }
+
+    const referenceIds = validIds || new Set(this.data.tasks.map(task => task.id));
+    const normalized = [];
+    const seen = new Set();
+
+    dependencies.forEach(candidate => {
+      if (typeof candidate !== 'string') {
+        return;
+      }
+
+      const trimmed = candidate.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      if (excludeId && trimmed === excludeId) {
+        return;
+      }
+
+      if (!referenceIds.has(trimmed)) {
+        return;
+      }
+
+      if (seen.has(trimmed)) {
+        return;
+      }
+
+      seen.add(trimmed);
+      normalized.push(trimmed);
+    });
+
+    return normalized;
+  },
+
+  _areArraysEqual(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+      return Array.isArray(a) === Array.isArray(b) && (Array.isArray(a) ? a.length : 0) === (Array.isArray(b) ? b.length : 0);
+    }
+
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    for (let index = 0; index < a.length; index += 1) {
+      if (a[index] !== b[index]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 };
