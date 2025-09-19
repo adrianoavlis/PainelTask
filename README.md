@@ -108,5 +108,5 @@ Lê dados diretamente de `/data/YYYY-MM.json`. Para atualizar:
 
 ---
 
-Feito com ❤️ por [Luis Adriano] para projetos de TCC, produtividade pessoal e open-source!
+Desenvolvido por [Luis Adriano] para projeto pessoal e open-source!
 
