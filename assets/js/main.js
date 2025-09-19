@@ -10,11 +10,13 @@ import { ToastView } from './view/toastView.js';
 import { ExportUtils } from './core/exportUtils.js';
 import { ICSUtils } from './core/icsUtils.js';
 import { EventBus } from './core/eventBus.js';
+import { TopicManagerView } from './view/topicManagerView.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   ToastView.init();
   ModalView.init();
   TaskDetailView.init();
+  TopicManagerView.init();
 
   const modeToggleBtn = document.getElementById('toggle-mode');
   const importBtn = document.getElementById('import-json');
@@ -94,5 +96,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   EventBus.on('taskRemoved', () => {
     ToastView.show('Tarefa excluída com sucesso!', 'warning');
+  });
+
+  EventBus.on('topicAdded', (topic) => {
+    ToastView.show(`Assunto "${topic}" criado com sucesso!`, 'success');
+  });
+
+  EventBus.on('topicUpdated', ({ newTopic, updatedCount }) => {
+    const suffix = updatedCount > 0
+      ? ` ${updatedCount} tarefa(s) atualizada(s).`
+      : '';
+    ToastView.show(`Assunto atualizado para "${newTopic}".${suffix}`, 'info');
+  });
+
+  EventBus.on('topicRemoved', ({ topic, replacement, reassignedCount, createdFallback }) => {
+    let message = `Assunto "${topic}" removido.`;
+
+    if (reassignedCount > 0) {
+      message += ` ${reassignedCount} tarefa(s) movida(s) para "${replacement}".`;
+    }
+
+    if (createdFallback) {
+      message += ' Criamos automaticamente um assunto padrão para você continuar organizando as tarefas.';
+    }
+
+    ToastView.show(message, 'warning');
   });
 });

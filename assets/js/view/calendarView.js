@@ -252,3 +252,7 @@ EventBus.on('taskUpdated', () => {
 EventBus.on('taskRemoved', () => {
   CalendarView.render();
 });
+
+EventBus.on('tasksBulkUpdated', () => {
+  CalendarView.render(CalendarView.currentMonth, CalendarView.currentTopic);
+});
