@@ -280,18 +280,33 @@ export const TaskModel = {
   },
 
   updateTask(updatedTask) {
+    if (!updatedTask || typeof updatedTask !== 'object') {
+      return;
+    }
+
     const index = this.data.tasks.findIndex(t => t.id === updatedTask.id);
     if (index === -1) {
       return;
     }
 
+    const currentTask = this.data.tasks[index];
+    const mergedTask = {
+      ...currentTask,
+      ...updatedTask
+    };
 
-      updatedTask.topic = topic;
-      updatedTask.collaborator = this._resolveExistingCollaborator(updatedTask.collaborator) || null;
-      updatedTask.status = this._normalizeStatusId(updatedTask.status);
-      updatedTask.updatedAt = nowISO();
-      this.data.tasks[index] = updatedTask;
+    const fallbackTopic = this.data.topics[0] || FALLBACK_TOPIC;
+    mergedTask.topic = this._resolveExistingTopic(mergedTask.topic) || fallbackTopic;
+    mergedTask.collaborator = this._resolveExistingCollaborator(mergedTask.collaborator) || null;
+    mergedTask.status = this._normalizeStatusId(mergedTask.status);
 
+    const validIds = new Set(this.data.tasks.map(task => task.id));
+    mergedTask.dependencies = this._normalizeDependencies(mergedTask.dependencies, {
+      excludeId: mergedTask.id,
+      validIds
+    });
+
+    mergedTask.updatedAt = nowISO();
 
     this.data.tasks[index] = mergedTask;
 
@@ -721,6 +736,7 @@ export const TaskModel = {
     const fallbackStatus = this.getDefaultStatusId();
 
     let needsPersist = false;
+    const validTaskIds = new Set(this.data.tasks.map(task => task.id));
 
     this.data.tasks.forEach(task => {
       const resolvedTopic = this._resolveExistingTopic(task.topic) || fallbackTopic;
@@ -872,7 +888,70 @@ export const TaskModel = {
 
     const fallback = { ...DEFAULT_STATUSES[0] };
     this.data.statuses.push(fallback);
+    this._applyStatusOrderMetadata();
     return fallback.id;
+  },
 
+  _normalizeDependencies(dependencies, { excludeId, validIds } = {}) {
+    if (!Array.isArray(this.data.tasks)) {
+      return [];
+    }
+
+    const normalizedValidIds = validIds instanceof Set
+      ? validIds
+      : new Set(Array.isArray(validIds) ? validIds : this.data.tasks.map(task => task.id));
+
+    const items = Array.isArray(dependencies)
+      ? dependencies
+      : typeof dependencies === 'string'
+        ? [dependencies]
+        : [];
+
+    const unique = new Set();
+    const result = [];
+
+    for (const rawDependency of items) {
+      if (typeof rawDependency !== 'string') {
+        continue;
+      }
+
+      const trimmed = rawDependency.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      if (excludeId && trimmed === excludeId) {
+        continue;
+      }
+
+      if (!normalizedValidIds.has(trimmed)) {
+        continue;
+      }
+
+      if (unique.has(trimmed)) {
+        continue;
+      }
+
+      unique.add(trimmed);
+      result.push(trimmed);
+    }
+
+    return result;
+  },
+
+  _areArraysEqual(a, b) {
+    if (a === b) {
+      return true;
+    }
+
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+      return false;
+    }
+
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    return a.every((value, index) => value === b[index]);
   }
 };
