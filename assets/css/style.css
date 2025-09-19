@@ -335,6 +335,7 @@ footer {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(243, 245, 255, 0.95) 100%);
   box-shadow: 0 1.5rem 3rem rgba(15, 23, 42, 0.12);
   backdrop-filter: blur(6px);
+  flex: 1 1 auto;
   min-height: 100%;
 }
 
@@ -366,6 +367,9 @@ footer {
   padding: 1.5rem 0;
   border-radius: 1rem;
   border: 1px dashed rgba(15, 23, 42, 0.12);
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
 }
 
 .status-column__empty i {
