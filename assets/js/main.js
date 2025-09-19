@@ -27,6 +27,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   const exportICSBtn = document.getElementById('export-ics');
   const fileInput = document.getElementById('json-file');
   const icsFileInput = document.getElementById('ics-file');
+  const headerMenuToggle = document.getElementById('header-menu-toggle');
+  const headerActionsGroup = document.querySelector('[data-header-actions]');
+
+  if (headerMenuToggle && headerActionsGroup) {
+    const closeMenu = () => {
+      headerActionsGroup.classList.remove('is-open');
+      headerMenuToggle.setAttribute('aria-expanded', 'false');
+    };
+
+    headerMenuToggle.addEventListener('click', () => {
+      const isOpen = headerActionsGroup.classList.toggle('is-open');
+      headerMenuToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!headerActionsGroup.contains(event.target) && !headerMenuToggle.contains(event.target)) {
+        closeMenu();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 992) {
+        closeMenu();
+      }
+    });
+  }
 
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode') || 'local';
