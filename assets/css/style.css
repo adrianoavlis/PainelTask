@@ -272,12 +272,395 @@ body {
 
 .task-card {
   cursor: pointer;
+  border: none;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f6ff 100%);
+  box-shadow: 0 0.75rem 1.5rem rgba(16, 26, 84, 0.08);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-card .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.task-card .card-title {
+  font-weight: 600;
+  color: #132a74;
+}
+
+.task-card small.text-muted {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #475569 !important;
+}
+
+.task-card .badge {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+}
+
+.task-card .badge.bg-secondary {
+  background-color: rgba(17, 25, 61, 0.08) !important;
+  color: #11193d !important;
+}
+
+.task-card .badge.bg-light {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+  color: #0f172a !important;
 }
 
 .task-card:hover,
 .task-card:focus {
-  transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 1rem 2rem rgba(16, 26, 84, 0.18);
   outline: none;
+}
+
+.task-card:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 4px;
+}
+
+.task-detail-modal {
+  border: none;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f9fafe 0%, #ffffff 100%);
+  box-shadow: 0 2rem 3.5rem rgba(12, 21, 56, 0.25);
+}
+
+.task-detail-modal__hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  padding: 2.25rem 2.5rem 1.75rem;
+  background: linear-gradient(135deg, #050b2c 0%, #162a72 58%, #2f48a1 100%);
+  color: #f8faff;
+}
+
+.task-detail-modal__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 45%);
+  pointer-events: none;
+}
+
+.task-detail-modal__hero-main,
+.task-detail-modal__hero-side {
+  position: relative;
+  z-index: 1;
+}
+
+.task-detail-modal__hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-detail-modal__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.task-detail-modal__topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.15);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.task-detail-modal__topic--empty {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 255, 0.75);
+}
+
+.task-detail-modal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.task-detail-modal__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: rgba(248, 250, 255, 0.85);
+}
+
+.task-detail-modal__meta-item i {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.task-detail-modal__hero-side {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-width: 220px;
+}
+
+.task-detail-modal__status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.task-detail-modal__status .form-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(248, 250, 255, 0.7);
+}
+
+.task-detail-modal__status .form-select {
+  border-radius: 0.75rem;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: #101a54;
+  box-shadow: none;
+}
+
+.task-detail-modal__status .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+
+.task-detail-modal__status-badge {
+  margin-top: 0.75rem;
+  align-self: flex-start;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.task-detail-modal__priority {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.task-detail-modal__priority-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 255, 0.75);
+}
+
+.task-detail-modal__priority .badge {
+  font-size: 0.95rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+}
+
+.task-detail-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.task-detail-modal__body {
+  padding: 2rem 2.5rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.task-detail-modal__section {
+  background: #f8faff;
+  border: 1px solid #e4e9fb;
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.06);
+}
+
+.task-detail-modal__section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  color: #162054;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+.task-detail-modal__section-title i {
+  font-size: 1rem;
+  color: #2f48a1;
+}
+
+.task-detail-modal__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.task-detail-modal__tag {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
+.task-detail-modal__dependencies {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-detail-modal__dependency {
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 0.5rem 1.25rem rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.task-detail-modal__dependency-title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.task-detail-modal__dependency-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.task-detail-modal__dependency-topic {
+  background: rgba(47, 72, 161, 0.12);
+  color: #2f48a1;
+}
+
+.task-detail-modal__dependency small {
+  font-size: 0.75rem;
+}
+
+.task-detail-modal__dependency--missing {
+  border-style: dashed;
+  border-color: #f59e0b;
+}
+
+.task-detail-modal__empty {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.task-detail-modal__notes {
+  margin: 0;
+  line-height: 1.6;
+  color: #1f2937;
+  white-space: pre-wrap;
+}
+
+.task-detail-modal__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.75rem 2.5rem 2rem;
+  border-top: 1px solid #e7ecff;
+  background: #ffffff;
+}
+
+.task-detail-modal__footer .btn {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.08);
+}
+
+.task-detail-modal__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.task-detail-modal__action {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.task-detail-modal__action:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.5);
+  border-radius: 50%;
+}
+
+.task-detail-modal__action-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-detail-modal__action-icon i {
+  font-size: 1.1rem;
+}
+
+.task-detail-modal__action-icon small {
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.task-detail-modal__action--edit .task-detail-modal__action-icon {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.task-detail-modal__action--delete .task-detail-modal__action-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.task-detail-modal__action:hover .task-detail-modal__action-icon,
+.task-detail-modal__action:focus .task-detail-modal__action-icon {
+  transform: translateY(-4px);
+  box-shadow: 0 1.25rem 2.5rem rgba(15, 23, 42, 0.25);
+}
+
+@media (max-width: 991.98px) {
+  .task-detail-modal__hero {
+    grid-template-columns: 1fr;
+  }
+
+  .task-detail-modal__hero-side {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .task-detail-modal__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .task-detail-modal__actions {
+    justify-content: center;
+  }
 }
