@@ -64,9 +64,21 @@ body {
 .app-header__actions {
   margin-left: auto;
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-header__actions-group {
+  display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.app-header__menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .app-header__actions .btn {
@@ -99,11 +111,26 @@ body {
 @media (max-width: 992px) {
   .app-header__actions {
     width: 100%;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .app-header__title {
     font-size: 1.25rem;
+  }
+
+  .app-header__menu-toggle {
+    display: inline-flex;
+  }
+
+  .app-header__actions-group {
+    width: 100%;
+    display: none;
+    justify-content: flex-start;
+  }
+
+  .app-header__actions-group.is-open {
+    display: flex;
   }
 }
 
