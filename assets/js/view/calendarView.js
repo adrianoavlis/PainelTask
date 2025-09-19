@@ -130,7 +130,7 @@ export const CalendarView = {
         }
 
         const dayHeader = document.createElement('div');
-        dayHeader.className = 'd-flex justify-content-between align-items-start';
+        dayHeader.className = 'calendar-day-header d-flex justify-content-between align-items-start';
 
         const dayNumber = document.createElement('span');
         dayNumber.className = 'fw-semibold small';
@@ -147,11 +147,14 @@ export const CalendarView = {
 
         cell.appendChild(dayHeader);
 
+        const content = document.createElement('div');
+        content.className = 'calendar-day-content';
+
         const dayTasks = tasks.filter(task => this._isTaskInDay(task, day));
 
         if (dayTasks.length > 0) {
           const list = document.createElement('div');
-          list.className = 'd-flex flex-column gap-1 mt-2';
+          list.className = 'calendar-day-task-list d-flex flex-column gap-1';
 
           dayTasks.forEach(task => {
             const badge = document.createElement('span');
@@ -167,8 +170,10 @@ export const CalendarView = {
             list.appendChild(badge);
           });
 
-          cell.appendChild(list);
+          content.appendChild(list);
         }
+
+        cell.appendChild(content);
 
         row.appendChild(cell);
       });
