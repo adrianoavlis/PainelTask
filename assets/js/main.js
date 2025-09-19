@@ -156,12 +156,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     ToastView.show(`Colaborador "${collaborator}" adicionado com sucesso!`, 'success');
   });
 
-  EventBus.on('collaboratorUpdated', ({ oldName, newName }) => {
-    const suffix = oldName !== newName ? ` Atualizado para "${newName}".` : '';
-    ToastView.show(`Colaborador editado.${suffix}`, 'info');
+  EventBus.on('collaboratorUpdated', ({ oldName, newName, updatedCount }) => {
+    let message = 'Colaborador editado.';
+    if (oldName !== newName) {
+      message += ` Atualizado para "${newName}".`;
+    }
+    if (updatedCount > 0) {
+      message += ` ${updatedCount} tarefa(s) atualizada(s).`;
+    }
+    ToastView.show(message, 'info');
   });
 
-  EventBus.on('collaboratorRemoved', (collaborator) => {
-    ToastView.show(`Colaborador "${collaborator}" removido.`, 'warning');
+  EventBus.on('collaboratorRemoved', ({ collaborator, clearedAssignments }) => {
+    let message = `Colaborador "${collaborator}" removido.`;
+    if (clearedAssignments > 0) {
+      message += ` ${clearedAssignments} tarefa(s) ficaram sem responsável.`;
+    }
+    ToastView.show(message, 'warning');
   });
 });

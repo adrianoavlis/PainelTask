@@ -72,6 +72,7 @@ export const TaskModel = {
 
     task.id = `t-${Date.now()}`;
     task.topic = topic;
+    task.collaborator = this._resolveExistingCollaborator(task.collaborator) || null;
     task.status = normalizeStatus(task.status);
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
@@ -121,6 +122,8 @@ export const TaskModel = {
         ? incomingTask.tags.filter(tag => typeof tag === 'string')
         : [];
 
+      const collaborator = this._resolveExistingCollaborator(incomingTask.collaborator) || null;
+
       const checklist = Array.isArray(incomingTask.checklist)
         ? incomingTask.checklist.filter(item => item && typeof item.text === 'string').map(item => ({
           text: item.text,
@@ -134,6 +137,7 @@ export const TaskModel = {
         topic,
         status,
         priority,
+        collaborator,
         startDate,
         dueDate,
         allDay: Boolean(incomingTask.allDay),
@@ -164,6 +168,7 @@ export const TaskModel = {
       const topic = this._resolveExistingTopic(updatedTask.topic) || this.data.topics[0] || FALLBACK_TOPIC;
 
       updatedTask.topic = topic;
+      updatedTask.collaborator = this._resolveExistingCollaborator(updatedTask.collaborator) || null;
       updatedTask.status = normalizeStatus(updatedTask.status);
       updatedTask.updatedAt = nowISO();
       this.data.tasks[index] = updatedTask;
@@ -224,12 +229,27 @@ export const TaskModel = {
     }
 
     this.data.collaborators[collaboratorIndex] = normalizedNew;
+
+    let updatedCount = 0;
+    const now = nowISO();
+    this.data.tasks.forEach(task => {
+      if (task.collaborator === current) {
+        task.collaborator = normalizedNew;
+        task.updatedAt = now;
+        updatedCount++;
+      }
+    });
+
     this.persist();
 
-    EventBus.emit('collaboratorUpdated', { oldName: current, newName: normalizedNew });
+    EventBus.emit('collaboratorUpdated', { oldName: current, newName: normalizedNew, updatedCount });
     EventBus.emit('collaboratorsChanged', [...this.data.collaborators]);
 
-    return { success: true, newName: normalizedNew };
+    if (updatedCount > 0) {
+      EventBus.emit('tasksBulkUpdated', [...this.data.tasks]);
+    }
+
+    return { success: true, newName: normalizedNew, updatedCount };
   },
 
   removeCollaborator(name) {
@@ -239,12 +259,27 @@ export const TaskModel = {
     }
 
     this.data.collaborators = this.data.collaborators.filter(item => item !== collaborator);
+
+    let clearedAssignments = 0;
+    const now = nowISO();
+    this.data.tasks.forEach(task => {
+      if (task.collaborator === collaborator) {
+        task.collaborator = null;
+        task.updatedAt = now;
+        clearedAssignments++;
+      }
+    });
+
     this.persist();
 
-    EventBus.emit('collaboratorRemoved', collaborator);
+    EventBus.emit('collaboratorRemoved', { collaborator, clearedAssignments });
     EventBus.emit('collaboratorsChanged', [...this.data.collaborators]);
 
-    return { success: true };
+    if (clearedAssignments > 0) {
+      EventBus.emit('tasksBulkUpdated', [...this.data.tasks]);
+    }
+
+    return { success: true, clearedAssignments };
   },
 
   addTopic(name) {
@@ -362,6 +397,7 @@ export const TaskModel = {
 
   _ensureTasksHaveValidTopics() {
     const validTopics = new Set(this.data.topics);
+    const validCollaborators = new Set(this.data.collaborators);
     if (validTopics.size === 0) {
       const fallback = FALLBACK_TOPIC;
       this.data.topics = [fallback];
@@ -383,6 +419,11 @@ export const TaskModel = {
 
       if (task.status !== normalizedStatus) {
         task.status = normalizedStatus;
+        updated = true;
+      }
+
+      if (task.collaborator && !validCollaborators.has(task.collaborator)) {
+        task.collaborator = null;
         updated = true;
       }
 
@@ -411,5 +452,9 @@ export const TaskModel = {
     if (!name) return undefined;
     const normalized = normalizeCollaboratorName(name).toLowerCase();
     return this.data.collaborators.find(collaborator => collaborator.toLowerCase() === normalized);
+  },
+
+  _resolveExistingCollaborator(name) {
+    return this._findCollaboratorInsensitive(name);
   }
 };

@@ -31,6 +31,10 @@ export const TaskDetailView = {
                   <h6 class="fw-bold">Assunto</h6>
                   <p class="mb-0" data-detail="topic"></p>
                 </div>
+                <div class="col-md-6">
+                  <h6 class="fw-bold">Colaborador</h6>
+                  <p class="mb-0" data-detail="collaborator"></p>
+                </div>
                 <div class="col-md-3">
                   <h6 class="fw-bold">Início</h6>
                   <p class="mb-0" data-detail="startDate"></p>
@@ -137,6 +141,7 @@ export const TaskDetailView = {
   fillDetails(task) {
     this.setText('title', task.title || '—');
     this.setText('topic', task.topic || '—');
+    this.setText('collaborator', task.collaborator || '—');
     this.setText('startDate', task.startDate || '—');
     this.setText('dueDate', task.dueDate || '—');
 

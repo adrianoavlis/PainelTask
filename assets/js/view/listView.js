@@ -69,6 +69,13 @@ export const ListView = {
         meta.appendChild(topicBadge);
         meta.appendChild(priorityBadge);
 
+        if (task.collaborator) {
+          const collaboratorBadge = document.createElement('span');
+          collaboratorBadge.className = 'badge bg-info text-dark';
+          collaboratorBadge.textContent = task.collaborator;
+          meta.appendChild(collaboratorBadge);
+        }
+
         body.appendChild(title);
         body.appendChild(date);
         body.appendChild(meta);
