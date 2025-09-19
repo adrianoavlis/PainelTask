@@ -1,7 +1,7 @@
 
-# 📝 TaskBoard – Lista de Tarefas com Calendário e Abas
+# 📝 TaskBoard – Lista de Tarefas e Calendário
 
-Uma aplicação moderna, 100% front-end (HTML + JS + Bootstrap), que permite gerenciar tarefas por assunto e visualizar tudo num calendário mensal.
+Uma aplicação que permite gerenciar tarefas por assunto e visualizar tudo num calendário mensal.
 
 ---
 
@@ -29,11 +29,9 @@ Uma aplicação moderna, 100% front-end (HTML + JS + Bootstrap), que permite ger
   index.html?mode=repo
   ```
 
-### 2. **Publicar no GitHub Pages**
-- Crie um repositório no GitHub.
-- Suba todos os arquivos do projeto.
-- Vá em **Settings > Pages**, escolha `main` branch e clique em **Save**.
-- Acesse o link gerado (ex: `https://seu-usuario.github.io/seu-repositorio`)
+### 2. **GitHub Pages**
+
+- Acesse: `https://adrianoavlis.github.io/PainelTask/`)
 
 ---
 
@@ -71,7 +69,6 @@ Uma aplicação moderna, 100% front-end (HTML + JS + Bootstrap), que permite ger
 - HTML5 + CSS3
 - Bootstrap 5.3.3
 - JavaScript moderno (ES Modules)
-- date-fns para manipulação de datas
 - localStorage / JSON externo
 - ICS (.ics) export para integração com calendários
 
