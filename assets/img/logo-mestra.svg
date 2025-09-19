@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120" role="img" aria-labelledby="title desc">
+  <title id="title">Mestra Informática</title>
+  <desc id="desc">Logotipo comemorativo da Mestra Informática com a letra M em amarelo e texto branco.</desc>
+  <defs>
+    <linearGradient id="mestra-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd400" />
+      <stop offset="100%" stop-color="#f0a400" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="120" fill="none" />
+  <path d="M35 98V22h30l25 42 25-42h30v76h-24V58l-19 34h-24L59 58v40H35z" fill="url(#mestra-glow)" />
+  <g fill="#ffffff">
+    <path d="M165 47h38v12h-24v10h21v12h-21v17h-14V47z" />
+    <path d="M215 47h33c11 0 18 6 18 16 0 8-4 14-12 15l15 20h-17l-13-18h-10v18h-14V47zm32 22c4 0 6-2 6-5s-2-5-6-5h-18v10h18z" />
+  </g>
+  <text x="165" y="104" font-family="" font-size="22" fill="#dbe2ff" letter-spacing="3">informática</text>
+</svg>

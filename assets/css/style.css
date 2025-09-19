@@ -3,6 +3,124 @@ body {
   background-color: #f8f9fa;
 }
 
+.app-header {
+  position: relative;
+  background: linear-gradient(120deg, #050b2c 0%, #101a54 45%, #1a2a6d 100%);
+  color: #fff;
+  padding: 0.75rem 0;
+  border-bottom: 4px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.app-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(45deg, rgba(255, 214, 0, 0.12) 0%, rgba(255, 214, 0, 0) 60%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.app-header__content {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 220px;
+}
+
+.brand-logo {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+.brand-logo--mestra {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+}
+
+.brand-logo--anniversary {
+  height: 32px;
+}
+
+.app-header__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f9f9fb;
+}
+
+.app-header__actions {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.app-header__actions .btn {
+  border-width: 2px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.app-header__actions .btn-outline-light:hover,
+.app-header__actions .btn-outline-light:focus {
+  color: #101a54;
+  background-color: #f9f9fb;
+}
+
+.app-header__actions .btn-outline-success,
+.app-header__actions .btn-outline-info,
+.app-header__actions .btn-outline-warning {
+  color: #fff;
+}
+
+.app-header__actions .btn-outline-success:hover,
+.app-header__actions .btn-outline-info:hover,
+.app-header__actions .btn-outline-warning:hover,
+.app-header__actions .btn-outline-success:focus,
+.app-header__actions .btn-outline-info:focus,
+.app-header__actions .btn-outline-warning:focus {
+  color: #101a54;
+}
+
+@media (max-width: 992px) {
+  .app-header__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .app-header__title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .brand-logo {
+    height: 32px;
+  }
+
+  .brand-logo--anniversary {
+    height: 26px;
+  }
+
+  .app-header__title {
+    font-size: 1.1rem;
+  }
+}
+
 .calendar-table th,
 .calendar-table td {
   width: 14.285%;
