@@ -690,6 +690,7 @@ footer {
   box-shadow: 0 2rem 3.5rem rgba(12, 21, 56, 0.25);
   display: flex;
   flex-direction: column;
+
   overflow: hidden;
   max-height: min(calc(100vh - 3rem), 62rem);
 }
@@ -698,6 +699,7 @@ footer {
   .task-form-modal {
     max-height: min(calc(100dvh - 3rem), 62rem);
   }
+
 }
 
 .task-form-modal__form {
@@ -705,6 +707,7 @@ footer {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+
 }
 
 .task-form-modal__hero {
@@ -778,8 +781,10 @@ footer {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+
 }
 
 .task-form-modal__section {
