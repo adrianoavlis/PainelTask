@@ -48,3 +48,7 @@ export const CalendarView = {
 EventBus.on('dataLoaded', () => {
   CalendarView.render();
 });
+
+EventBus.on('tasksBulkUpdated', () => {
+  CalendarView.render();
+});
