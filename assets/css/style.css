@@ -18,3 +18,15 @@ body {
   font-weight: bold;
   font-size: 0.9rem;
 }
+
+.task-card {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-card:hover,
+.task-card:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  outline: none;
+}

@@ -2,6 +2,10 @@ import { TaskModel } from '../model/taskModel.js';
 import { EventBus } from '../core/eventBus.js';
 
 export const ModalView = {
+  modal: null,
+  form: null,
+  currentTask: null,
+
   init() {
     const modalHtml = `
     <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
@@ -58,10 +62,18 @@ export const ModalView = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     this.updateTopicOptions();
 
-    const form = document.getElementById('taskForm');
-    form.addEventListener('submit', (e) => {
+    this.form = document.getElementById('taskForm');
+    const modalEl = document.getElementById('taskModal');
+    this.modal = new bootstrap.Modal(modalEl);
+
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      this.resetForm();
+    });
+
+    this.form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const data = Object.fromEntries(new FormData(form).entries());
+      const formData = new FormData(this.form);
+      const data = Object.fromEntries(formData.entries());
       data.tags = data.tags
         ? data.tags
           .split(',')
@@ -69,9 +81,21 @@ export const ModalView = {
           .filter(tag => tag.length > 0)
         : [];
 
-      TaskModel.addTask(data);
-      bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-      form.reset();
+      if (this.currentTask) {
+        const existingTask = TaskModel.getTaskById(this.currentTask.id);
+        if (existingTask) {
+          const updatedTask = {
+            ...existingTask,
+            ...data,
+            tags: data.tags
+          };
+          TaskModel.updateTask(updatedTask);
+        }
+      } else {
+        TaskModel.addTask(data);
+      }
+
+      this.modal.hide();
     });
   },
 
@@ -84,14 +108,46 @@ export const ModalView = {
     select.innerHTML = options;
   },
 
-  open() {
-    const modalEl = document.getElementById('taskModal');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
+  open(task = null) {
+    this.currentTask = task ? { ...task } : null;
+    this.updateTopicOptions();
+    this.form.reset();
+
+    const title = document.getElementById('taskModalLabel');
+    const submitBtn = this.form.querySelector('button[type="submit"]');
+
+    if (this.currentTask) {
+      title.textContent = 'Editar Tarefa';
+      submitBtn.textContent = 'Atualizar';
+      this.fillForm(this.currentTask);
+    } else {
+      title.textContent = 'Nova Tarefa';
+      submitBtn.textContent = 'Salvar';
+    }
+
+    this.modal.show();
+  },
+
+  fillForm(task) {
+    this.form.querySelector('input[name="title"]').value = task.title || '';
+    this.form.querySelector('select[name="topic"]').value = task.topic || '';
+    this.form.querySelector('input[name="startDate"]').value = task.startDate || '';
+    this.form.querySelector('input[name="dueDate"]').value = task.dueDate || '';
+    this.form.querySelector('select[name="priority"]').value = task.priority || 'low';
+    this.form.querySelector('input[name="tags"]').value = Array.isArray(task.tags) ? task.tags.join(', ') : '';
+    this.form.querySelector('textarea[name="notes"]').value = task.notes || '';
+  },
+
+  resetForm() {
+    if (!this.form) return;
+    this.currentTask = null;
+    this.form.reset();
+    document.getElementById('taskModalLabel').textContent = 'Nova Tarefa';
+    this.form.querySelector('button[type="submit"]').textContent = 'Salvar';
   }
 };
 
 EventBus.on('dataLoaded', () => ModalView.updateTopicOptions());
 EventBus.on('taskAdded', () => ModalView.updateTopicOptions());
 EventBus.on('taskUpdated', () => ModalView.updateTopicOptions());
-EventBus.on('openTaskModal', () => ModalView.open());
+EventBus.on('openTaskModal', (task) => ModalView.open(task));

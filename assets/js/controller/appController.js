@@ -24,8 +24,8 @@ export const AppController = {
       ToastView.show('Tarefa atualizada com sucesso!', 'info');
     });
 
-    EventBus.on('openTaskModal', () => {
-      ModalView.open();
+    EventBus.on('openTaskModal', (task) => {
+      ModalView.open(task);
     });
 
     await TaskModel.init();
