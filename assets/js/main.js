@@ -85,4 +85,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   EventBus.on('taskAdded', () => {
     ToastView.show('Tarefa salva com sucesso!', 'success');
   });
+
+  EventBus.on('taskUpdated', () => {
+    ToastView.show('Tarefa atualizada com sucesso!', 'info');
+  });
+
+  EventBus.on('taskRemoved', () => {
+    ToastView.show('Tarefa excluída com sucesso!', 'warning');
+  });
 });
