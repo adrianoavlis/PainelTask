@@ -35,6 +35,10 @@ export const TaskModel = {
     return this.data.topics;
   },
 
+  getTaskById(id) {
+    return this.data.tasks.find(task => task.id === id);
+  },
+
   addTask(task) {
     task.id = `t-${Date.now()}`;
     task.createdAt = new Date().toISOString();
@@ -53,6 +57,7 @@ export const TaskModel = {
       EventBus.emit('taskUpdated', updatedTask);
     }
   },
+
 
   getTasksByTopic(topic) {
     return this.data.tasks.filter(task => task.topic === topic);
@@ -119,6 +124,15 @@ export const TaskModel = {
     EventBus.emit('tasksBulkUpdated', this.data.tasks);
 
     return { success: true, removedTasks };
+
+  removeTask(id) {
+    const index = this.data.tasks.findIndex(task => task.id === id);
+    if (index !== -1) {
+      const [removedTask] = this.data.tasks.splice(index, 1);
+      this.persist();
+      EventBus.emit('taskRemoved', removedTask);
+    }
+
   },
 
   persist() {

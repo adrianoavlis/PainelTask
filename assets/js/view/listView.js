@@ -34,19 +34,56 @@ export const ListView = {
 
       filtered.filter(t => t.status === status).forEach(task => {
         const card = document.createElement('div');
-        card.className = 'card mb-2';
-        card.innerHTML = `
-          <div class="card-body p-2">
-            <h6 class="card-title mb-1">${task.title}</h6>
-            <small class="text-muted">${task.dueDate || 'Sem data'}</small>
-            <div class="mt-1">
-              <span class="badge bg-secondary">${task.topic}</span>
-              <span class="badge bg-${task.priority === 'high' ? 'danger' : task.priority === 'medium' ? 'warning' : 'light'} text-dark">
-                ${task.priority}
-              </span>
-            </div>
-          </div>
-        `;
+
+        card.className = 'card mb-2 task-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+
+        const body = document.createElement('div');
+        body.className = 'card-body p-2';
+
+        const title = document.createElement('h6');
+        title.className = 'card-title mb-1';
+        title.textContent = task.title;
+
+        const date = document.createElement('small');
+        date.className = 'text-muted';
+        date.textContent = task.dueDate || 'Sem data';
+
+        const meta = document.createElement('div');
+        meta.className = 'mt-1 d-flex flex-wrap gap-1';
+
+        const topicBadge = document.createElement('span');
+        topicBadge.className = 'badge bg-secondary';
+        topicBadge.textContent = task.topic;
+
+        const priorityBadge = document.createElement('span');
+        const priorityClasses = {
+          high: 'badge bg-danger',
+          medium: 'badge bg-warning text-dark',
+          low: 'badge bg-light text-dark'
+        };
+        priorityBadge.className = priorityClasses[task.priority] || 'badge bg-light text-dark';
+        priorityBadge.textContent = task.priority;
+
+        meta.appendChild(topicBadge);
+        meta.appendChild(priorityBadge);
+
+        body.appendChild(title);
+        body.appendChild(date);
+        body.appendChild(meta);
+
+        card.appendChild(body);
+        card.addEventListener('click', () => {
+          EventBus.emit('openTaskDetail', task);
+        });
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            EventBus.emit('openTaskDetail', task);
+          }
+        });
+
         box.appendChild(card);
       });
 

@@ -5,6 +5,7 @@ import { CalendarView } from './view/calendarView.js';
 import { TabsView } from './view/tabsView.js';
 import { ModalView } from './view/modalView.js';
 import { ListView } from './view/listView.js';
+import { TaskDetailView } from './view/taskDetailView.js';
 import { ToastView } from './view/toastView.js';
 import { TopicManagerView } from './view/topicManagerView.js';
 import { ExportUtils } from './core/exportUtils.js';
@@ -14,6 +15,7 @@ import { EventBus } from './core/eventBus.js';
 document.addEventListener('DOMContentLoaded', async () => {
   ToastView.init();
   ModalView.init();
+
   TopicManagerView.init();
 
   const modeToggleBtn = document.getElementById('toggle-mode');
@@ -80,11 +82,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.body.appendChild(fab);
 
   EventBus.on('topicSelected', topic => {
-    CalendarView.render();
+    CalendarView.render(CalendarView.currentMonth, topic);
     ListView.render(topic);
   });
 
   EventBus.on('taskAdded', () => {
     ToastView.show('Tarefa salva com sucesso!', 'success');
+  });
+
+  EventBus.on('taskUpdated', () => {
+    ToastView.show('Tarefa atualizada com sucesso!', 'info');
+  });
+
+  EventBus.on('taskRemoved', () => {
+    ToastView.show('Tarefa excluída com sucesso!', 'warning');
   });
 });
