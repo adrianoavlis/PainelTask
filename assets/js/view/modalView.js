@@ -38,6 +38,10 @@ export const ModalView = {
                 </select>
               </div>
               <div class="col-12">
+                <label class="form-label">Tags (separe por vírgulas)</label>
+                <input type="text" class="form-control" name="tags" placeholder="ex: urgente, backend, reunião">
+              </div>
+              <div class="col-12">
                 <label class="form-label">Notas</label>
                 <textarea class="form-control" name="notes" rows="3"></textarea>
               </div>
@@ -58,6 +62,13 @@ export const ModalView = {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(form).entries());
+      data.tags = data.tags
+        ? data.tags
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(tag => tag.length > 0)
+        : [];
+
       TaskModel.addTask(data);
       bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
       form.reset();
