@@ -34,7 +34,10 @@ export const ListView = {
 
       filtered.filter(t => t.status === status).forEach(task => {
         const card = document.createElement('div');
-        card.className = 'card mb-2';
+
+        card.className = 'card mb-2 task-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
 
         const body = document.createElement('div');
         body.className = 'card-body p-2';
@@ -66,36 +69,21 @@ export const ListView = {
         meta.appendChild(topicBadge);
         meta.appendChild(priorityBadge);
 
-        const actions = document.createElement('div');
-        actions.className = 'd-flex gap-2 mt-2';
-
-        const editBtn = document.createElement('button');
-        editBtn.type = 'button';
-        editBtn.className = 'btn btn-sm btn-outline-primary';
-        editBtn.textContent = 'Editar';
-        editBtn.addEventListener('click', () => {
-          EventBus.emit('openTaskModal', task);
-        });
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'btn btn-sm btn-outline-danger';
-        deleteBtn.textContent = 'Excluir';
-        deleteBtn.addEventListener('click', () => {
-          if (confirm('Deseja excluir esta tarefa?')) {
-            TaskModel.removeTask(task.id);
-          }
-        });
-
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-
         body.appendChild(title);
         body.appendChild(date);
         body.appendChild(meta);
-        body.appendChild(actions);
 
         card.appendChild(body);
+        card.addEventListener('click', () => {
+          EventBus.emit('openTaskDetail', task);
+        });
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            EventBus.emit('openTaskDetail', task);
+          }
+        });
+
         box.appendChild(card);
       });
 
