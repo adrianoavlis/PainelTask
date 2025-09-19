@@ -8,6 +8,8 @@ export const TopicManagerView = {
   listEl: null,
   formEl: null,
   inputEl: null,
+  modalInitBound: false,
+  pendingOpen: false,
 
   init() {
     const manageButton = document.getElementById('manage-topics');
@@ -60,7 +62,7 @@ export const TopicManagerView = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
     this.modalEl = document.getElementById('topicManagerModal');
-    this.modal = new bootstrap.Modal(this.modalEl);
+    this._ensureModalInstance();
     this.listEl = this.modalEl.querySelector('[data-topic-list]');
     this.formEl = this.modalEl.querySelector('#topicManagerForm');
     this.inputEl = this.modalEl.querySelector('#topicManagerInput');
@@ -76,7 +78,21 @@ export const TopicManagerView = {
   },
 
   open() {
-    if (!this.modal) return;
+    if (!this._ensureModalInstance()) {
+      if (!this.pendingOpen && document.readyState !== 'complete') {
+        this.pendingOpen = true;
+        window.addEventListener('load', () => {
+          this.pendingOpen = false;
+          this.open();
+        }, { once: true });
+        return;
+      }
+
+      ToastView.show('Não foi possível abrir o gerenciador de assuntos no momento.', 'danger');
+      return;
+    }
+
+    this.pendingOpen = false;
     this.render();
     this.modal.show();
   },
@@ -108,7 +124,9 @@ export const TopicManagerView = {
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
       editBtn.className = 'btn btn-outline-secondary';
-      editBtn.textContent = 'Renomear';
+      editBtn.innerHTML = '<i class="fa-solid fa-pen"></i><span class="visually-hidden">Renomear</span>';
+      editBtn.setAttribute('aria-label', 'Renomear assunto');
+      editBtn.title = 'Renomear';
       editBtn.addEventListener('click', () => {
         this._handleRenameTopic(topic);
       });
@@ -176,5 +194,32 @@ export const TopicManagerView = {
 
     const message = messages[reason] || 'Não foi possível completar a ação.';
     ToastView.show(message, 'danger');
+  },
+
+  _ensureModalInstance() {
+    if (this.modal || !this.modalEl) {
+      return Boolean(this.modal);
+    }
+
+    const ModalCtor = window.bootstrap?.Modal;
+    if (typeof ModalCtor === 'function') {
+      this.modal = new ModalCtor(this.modalEl);
+      return true;
+    }
+
+    if (!this.modalInitBound) {
+      this.modalInitBound = true;
+      window.addEventListener('load', () => {
+        if (this.modal || !this.modalEl) {
+          return;
+        }
+        const LateCtor = window.bootstrap?.Modal;
+        if (typeof LateCtor === 'function') {
+          this.modal = new LateCtor(this.modalEl);
+        }
+      }, { once: true });
+    }
+
+    return false;
   }
 };

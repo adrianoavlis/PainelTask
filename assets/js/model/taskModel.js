@@ -184,7 +184,6 @@ export const TaskModel = {
     task.topic = topic;
     task.collaborator = this._resolveExistingCollaborator(task.collaborator) || null;
     task.status = this._normalizeStatusId(task.status);
-
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
 
@@ -516,7 +515,6 @@ export const TaskModel = {
     }
 
     this.data.statuses = remaining;
-
     this._applyStatusOrderMetadata();
 
 
@@ -545,7 +543,6 @@ export const TaskModel = {
 
     return { success: true, fallback, reassignedCount };
   },
-
 
   reorderStatuses(orderIds) {
     if (!Array.isArray(this.data.statuses) || this.data.statuses.length === 0) {
@@ -770,7 +767,6 @@ export const TaskModel = {
       this.persist();
     }
   },
-
 
   _applyStatusOrderMetadata() {
     if (!Array.isArray(this.data.statuses)) {

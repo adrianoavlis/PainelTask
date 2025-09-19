@@ -258,6 +258,5 @@ export const TaskDetailView = {
     const defaultStatus = TaskModel.getDefaultStatusId();
     const statusToSelect = statuses.find(status => status.id === selectedId)?.id || defaultStatus;
     statusSelect.value = statusToSelect;
-
   }
 };

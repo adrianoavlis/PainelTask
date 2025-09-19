@@ -10,6 +10,8 @@ export const StatusManagerView = {
   inputEl: null,
 
   dragSetup: false,
+  modalInitBound: false,
+  pendingOpen: false,
 
 
   init() {
@@ -66,13 +68,14 @@ export const StatusManagerView = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
     this.modalEl = document.getElementById('statusManagerModal');
-    this.modal = new bootstrap.Modal(this.modalEl);
+
+    this._ensureModalInstance();
+
     this.listEl = this.modalEl.querySelector('[data-status-list]');
     this.formEl = this.modalEl.querySelector('#statusManagerForm');
     this.inputEl = this.modalEl.querySelector('#statusManagerInput');
 
     this._setupDragAndDrop();
-
 
     this.modalEl.addEventListener('shown.bs.modal', () => {
       this.inputEl?.focus();
@@ -85,7 +88,23 @@ export const StatusManagerView = {
   },
 
   open() {
-    if (!this.modal) return;
+
+    if (!this._ensureModalInstance()) {
+      if (!this.pendingOpen && document.readyState !== 'complete') {
+        this.pendingOpen = true;
+        window.addEventListener('load', () => {
+          this.pendingOpen = false;
+          this.open();
+        }, { once: true });
+        return;
+      }
+
+      ToastView.show('Não foi possível abrir o gerenciador de status no momento.', 'danger');
+      return;
+    }
+
+    this.pendingOpen = false;
+
     this.render();
     this.modal.show();
   },
@@ -105,7 +124,6 @@ export const StatusManagerView = {
     }
 
     const tasks = TaskModel.getTasks();
-
 
     statuses.forEach((status, index) => {
       const item = document.createElement('div');
@@ -129,7 +147,6 @@ export const StatusManagerView = {
       const orderBadge = document.createElement('span');
       orderBadge.className = 'badge rounded-pill text-bg-light text-dark border';
       orderBadge.textContent = `#${previousOrder + 1}`;
-
 
       const badge = document.createElement('span');
       badge.className = `badge ${status.badgeClass || 'text-bg-secondary'}`;
@@ -158,8 +175,10 @@ export const StatusManagerView = {
       const renameBtn = document.createElement('button');
       renameBtn.type = 'button';
       renameBtn.className = 'btn btn-outline-secondary';
-      renameBtn.textContent = 'Renomear';
 
+      renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i><span class="visually-hidden">Renomear</span>';
+      renameBtn.setAttribute('aria-label', 'Renomear status');
+      renameBtn.title = 'Renomear';
       renameBtn.draggable = false;
 
       renameBtn.addEventListener('click', () => {
@@ -237,6 +256,34 @@ export const StatusManagerView = {
 
     const message = messages[reason] || 'Não foi possível completar a ação.';
     ToastView.show(message, 'danger');
+
+  },
+
+  _ensureModalInstance() {
+    if (this.modal || !this.modalEl) {
+      return Boolean(this.modal);
+    }
+
+    const ModalCtor = window.bootstrap?.Modal;
+    if (typeof ModalCtor === 'function') {
+      this.modal = new ModalCtor(this.modalEl);
+      return true;
+    }
+
+    if (!this.modalInitBound) {
+      this.modalInitBound = true;
+      window.addEventListener('load', () => {
+        if (this.modal || !this.modalEl) {
+          return;
+        }
+        const LateCtor = window.bootstrap?.Modal;
+        if (typeof LateCtor === 'function') {
+          this.modal = new LateCtor(this.modalEl);
+        }
+      }, { once: true });
+    }
+
+    return false;
 
   },
 
