@@ -10,62 +10,120 @@ export const ModalView = {
   init() {
     const modalHtml = `
     <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <form id="taskForm">
-            <div class="modal-header">
-              <h5 class="modal-title" id="taskModalLabel">Nova Tarefa</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content task-form-modal">
+          <form id="taskForm" class="task-form-modal__form">
+            <div class="task-form-modal__hero">
+              <div class="task-form-modal__hero-main">
+                <span class="task-form-modal__badge">
+                  <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                  Gestão de tarefa
+                </span>
+                <h2 class="task-form-modal__title" id="taskModalLabel">Nova Tarefa</h2>
+                <p class="task-form-modal__subtitle">Atualize os dados para manter o cronograma alinhado.</p>
+              </div>
+              <button type="button" class="btn-close btn-close-white task-form-modal__close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <div class="modal-body row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Título</label>
-                <input type="text" class="form-control" name="title" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Assunto</label>
-                <select class="form-select" name="topic" required></select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Colaborador</label>
-                <select class="form-select" name="collaborator"></select>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Dependências</label>
-                <div class="dependency-field">
-                  <input type="text" class="form-control mb-2" placeholder="Pesquisar atividades" data-dependency-search>
-                  <select class="form-select" name="dependencies" multiple size="6" data-dependency-options></select>
-                  <div class="form-text">Selecione as atividades que precisam ser concluídas antes desta.</div>
+
+            <div class="task-form-modal__body">
+              <section class="task-form-modal__section">
+                <h6 class="task-form-modal__section-title">
+                  <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                  Informações principais
+                </h6>
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <label class="form-label">Título</label>
+                    <input type="text" class="form-control" name="title" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Assunto</label>
+                    <select class="form-select" name="topic" required></select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Colaborador</label>
+                    <select class="form-select" name="collaborator"></select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Prioridade</label>
+                    <select class="form-select" name="priority">
+                      <option value="low">Baixa</option>
+                      <option value="medium">Média</option>
+                      <option value="high">Alta</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Data de Início</label>
-                <input type="date" class="form-control" name="startDate">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Data Final</label>
-                <input type="date" class="form-control" name="dueDate">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Prioridade</label>
-                <select class="form-select" name="priority">
-                  <option value="low">Baixa</option>
-                  <option value="medium">Média</option>
-                  <option value="high">Alta</option>
-                </select>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Tags (separe por vírgulas)</label>
-                <input type="text" class="form-control" name="tags" placeholder="ex: urgente, backend, reunião">
-              </div>
-              <div class="col-12">
-                <label class="form-label">Notas</label>
-                <textarea class="form-control" name="notes" rows="3"></textarea>
-              </div>
+              </section>
+
+              <section class="task-form-modal__section">
+                <h6 class="task-form-modal__section-title">
+                  <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                  Planejamento
+                </h6>
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <label class="form-label">Data de início</label>
+                    <input type="date" class="form-control" name="startDate">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Data final</label>
+                    <input type="date" class="form-control" name="dueDate">
+                  </div>
+                </div>
+              </section>
+
+              <section class="task-form-modal__section">
+                <h6 class="task-form-modal__section-title">
+                  <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
+                  Dependências
+                </h6>
+                <div class="row g-4 align-items-start">
+                  <div class="col-12 col-lg-5">
+                    <label class="form-label" for="taskDependencySearch">Pesquisar atividades</label>
+                    <div class="input-group task-form-modal__search">
+                      <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+                      <input type="text" id="taskDependencySearch" class="form-control" placeholder="Digite para filtrar" data-dependency-search>
+                    </div>
+                    <div class="form-text">Use a busca para localizar rapidamente as atividades relacionadas.</div>
+                  </div>
+                  <div class="col-12 col-lg-7">
+                    <label class="form-label" for="taskDependencySelect">Atividades prévias</label>
+                    <select id="taskDependencySelect" class="form-select task-form-modal__dependencies-select" name="dependencies" multiple size="6" data-dependency-options></select>
+                    <div class="form-text">Selecione as atividades que precisam ser concluídas antes desta.</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="task-form-modal__section">
+                <h6 class="task-form-modal__section-title">
+                  <i class="fa-solid fa-notes-medical" aria-hidden="true"></i>
+                  Contexto adicional
+                </h6>
+                <div class="row g-4">
+                  <div class="col-12">
+                    <label class="form-label">Tags (separe por vírgulas)</label>
+                    <input type="text" class="form-control" name="tags" placeholder="ex: urgente, backend, reunião">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Notas</label>
+                    <textarea class="form-control task-form-modal__notes" name="notes" rows="4"></textarea>
+                  </div>
+                </div>
+              </section>
             </div>
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-success">Salvar</button>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+            <div class="task-form-modal__footer">
+              <div class="task-form-modal__footer-info">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                <span>Mantenha as informações atualizadas para melhorar a visualização.</span>
+              </div>
+              <div class="task-form-modal__actions">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success task-form-modal__submit">
+                  <i class="fa-solid fa-floppy-disk me-2" aria-hidden="true"></i>
+                  <span data-task-form-submit-label>Salvar</span>
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -124,6 +182,18 @@ export const ModalView = {
 
       this.modal.hide();
     });
+  },
+
+  setSubmitButtonText(text) {
+    if (!this.form) return;
+    const submitBtn = this.form.querySelector('button[type="submit"]');
+    if (!submitBtn) return;
+    const labelEl = submitBtn.querySelector('[data-task-form-submit-label]');
+    if (labelEl) {
+      labelEl.textContent = text;
+    } else {
+      submitBtn.textContent = text;
+    }
   },
 
   updateTopicOptions() {
@@ -204,15 +274,14 @@ export const ModalView = {
     this.form.reset();
 
     const title = document.getElementById('taskModalLabel');
-    const submitBtn = this.form.querySelector('button[type="submit"]');
 
     if (this.currentTask) {
       title.textContent = 'Editar Tarefa';
-      submitBtn.textContent = 'Atualizar';
+      this.setSubmitButtonText('Atualizar');
       this.fillForm(this.currentTask);
     } else {
       title.textContent = 'Nova Tarefa';
-      submitBtn.textContent = 'Salvar';
+      this.setSubmitButtonText('Salvar');
     }
 
     this.modal.show();
@@ -253,7 +322,7 @@ export const ModalView = {
     this.currentTask = null;
     this.form.reset();
     document.getElementById('taskModalLabel').textContent = 'Nova Tarefa';
-    this.form.querySelector('button[type="submit"]').textContent = 'Salvar';
+    this.setSubmitButtonText('Salvar');
     this.updateDependencyOptions([]);
     if (this.dependencySearchInput) {
       this.dependencySearchInput.value = '';
