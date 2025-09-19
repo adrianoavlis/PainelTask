@@ -72,15 +72,15 @@ export const TaskDetailView = {
                 <i class="fa-solid fa-arrow-left me-2" aria-hidden="true"></i>
                 Fechar
               </button>
-              <div class="task-detail-modal__actions">
-                <button type="button" class="task-detail-modal__action task-detail-modal__action--edit" data-action="edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar tarefa" aria-label="Editar tarefa">
-                  <span class="task-detail-modal__action-icon">
+              <div class="task-detail-modal__actions app-circle-action-group">
+                <button type="button" class="task-detail-modal__action task-detail-modal__action--edit app-circle-action app-circle-action--edit" data-action="edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar tarefa" aria-label="Editar tarefa">
+                  <span class="task-detail-modal__action-icon app-circle-action__icon">
                     <i class="fa-solid fa-pen" aria-hidden="true"></i>
                     <small>Editar</small>
                   </span>
                 </button>
-                <button type="button" class="task-detail-modal__action task-detail-modal__action--delete" data-action="delete" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir tarefa" aria-label="Excluir tarefa">
-                  <span class="task-detail-modal__action-icon">
+                <button type="button" class="task-detail-modal__action task-detail-modal__action--delete app-circle-action app-circle-action--delete" data-action="delete" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir tarefa" aria-label="Excluir tarefa">
+                  <span class="task-detail-modal__action-icon app-circle-action__icon">
                     <i class="fa-solid fa-trash" aria-hidden="true"></i>
                     <small>Excluir</small>
                   </span>

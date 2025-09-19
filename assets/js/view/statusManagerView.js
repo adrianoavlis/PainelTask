@@ -136,7 +136,7 @@ export const StatusManagerView = {
       this._setItemDragBehavior(item);
 
       const infoContainer = document.createElement('div');
-      infoContainer.className = 'd-flex align-items-center gap-2 flex-wrap';
+      infoContainer.className = 'd-flex align-items-center gap-2 flex-wrap flex-grow-1';
 
       const dragHandle = document.createElement('span');
       dragHandle.className = 'text-muted small user-select-none';
@@ -170,13 +170,18 @@ export const StatusManagerView = {
       infoContainer.appendChild(countBadge);
 
       const actions = document.createElement('div');
-      actions.className = 'btn-group btn-group-sm';
+      actions.className = 'app-circle-action-group flex-shrink-0';
 
       const renameBtn = document.createElement('button');
       renameBtn.type = 'button';
-      renameBtn.className = 'btn btn-outline-secondary';
+      renameBtn.className = 'app-circle-action app-circle-action--edit';
 
-      renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i><span class="visually-hidden">Renomear</span>';
+      renameBtn.innerHTML = `
+        <span class="app-circle-action__icon" aria-hidden="true">
+          <i class="fa-solid fa-pen"></i>
+          <small>Editar</small>
+        </span>
+      `.trim();
       renameBtn.setAttribute('aria-label', 'Renomear status');
       renameBtn.title = 'Renomear';
       renameBtn.draggable = false;
@@ -187,8 +192,13 @@ export const StatusManagerView = {
 
       const deleteBtn = document.createElement('button');
       deleteBtn.type = 'button';
-      deleteBtn.className = 'btn btn-outline-danger';
-      deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i><span class="visually-hidden">Excluir</span>';
+      deleteBtn.className = 'app-circle-action app-circle-action--delete';
+      deleteBtn.innerHTML = `
+        <span class="app-circle-action__icon" aria-hidden="true">
+          <i class="fa-solid fa-trash"></i>
+          <small>Excluir</small>
+        </span>
+      `.trim();
       deleteBtn.setAttribute('aria-label', 'Excluir status');
       deleteBtn.title = 'Excluir';
 

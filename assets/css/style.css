@@ -595,6 +595,15 @@ body {
   gap: 1rem;
 }
 
+.app-circle-action-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.app-circle-action,
 .task-detail-modal__action {
   background: transparent;
   border: none;
@@ -602,11 +611,13 @@ body {
   cursor: pointer;
 }
 
+.app-circle-action:focus-visible,
 .task-detail-modal__action:focus-visible {
   outline: 3px solid rgba(59, 130, 246, 0.5);
   border-radius: 50%;
 }
 
+.app-circle-action__icon,
 .task-detail-modal__action-icon {
   width: 3.25rem;
   height: 3.25rem;
@@ -622,24 +633,30 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.app-circle-action__icon i,
 .task-detail-modal__action-icon i {
   font-size: 1.1rem;
 }
 
+.app-circle-action__icon small,
 .task-detail-modal__action-icon small {
   font-size: 0.55rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.app-circle-action--edit .app-circle-action__icon,
 .task-detail-modal__action--edit .task-detail-modal__action-icon {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
 
+.app-circle-action--delete .app-circle-action__icon,
 .task-detail-modal__action--delete .task-detail-modal__action-icon {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
+.app-circle-action:hover .app-circle-action__icon,
+.app-circle-action:focus .app-circle-action__icon,
 .task-detail-modal__action:hover .task-detail-modal__action-icon,
 .task-detail-modal__action:focus .task-detail-modal__action-icon {
   transform: translateY(-4px);
@@ -662,5 +679,45 @@ body {
 
   .task-detail-modal__actions {
     justify-content: center;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .task-detail-modal {
+    max-height: calc(100vh - 1rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .task-detail-modal__hero,
+  .task-detail-modal__body,
+  .task-detail-modal__footer {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .task-detail-modal__hero {
+    padding-top: 1.75rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .task-detail-modal__body {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .task-detail-modal__footer {
+    padding-bottom: 1.75rem;
+  }
+
+  .app-circle-action-group {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .app-circle-action__icon,
+  .task-detail-modal__action-icon {
+    width: 3rem;
+    height: 3rem;
   }
 }
