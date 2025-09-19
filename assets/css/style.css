@@ -63,16 +63,34 @@ body {
 
 .app-header__actions {
   margin-left: auto;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+
+.app-header__menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .app-header__actions-group {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: none;
+  flex-direction: column;
+
   gap: 0.5rem;
+  min-width: 220px;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(16, 26, 84, 0.96);
+  box-shadow: 0 0.75rem 1.5rem rgba(5, 11, 44, 0.45);
+  z-index: 10;
 }
 
 .app-header__menu-toggle {
@@ -119,19 +137,21 @@ body {
     font-size: 1.25rem;
   }
 
-  .app-header__menu-toggle {
-    display: inline-flex;
-  }
 
   .app-header__actions-group {
+    position: static;
     width: 100%;
-    display: none;
-    justify-content: flex-start;
+    margin-top: 0.75rem;
+    padding: 0.75rem 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
   }
+}
 
-  .app-header__actions-group.is-open {
-    display: flex;
-  }
+.app-header__actions-group.is-open {
+  display: flex;
+
 }
 
 @media (max-width: 576px) {
@@ -145,6 +165,10 @@ body {
 
   .app-header__title {
     font-size: 1.1rem;
+  }
+
+  .app-header__actions-group .btn {
+    width: 100%;
   }
 }
 
