@@ -102,10 +102,17 @@ export const ModalView = {
   updateTopicOptions() {
     const select = document.querySelector('#taskForm select[name="topic"]');
     if (!select) return;
-    const options = TaskModel.getTopics()
-      .map(topic => `<option value="${topic}">${topic}</option>`)
-      .join('');
-    select.innerHTML = options;
+    const topics = TaskModel.getTopics();
+    if (topics.length === 0) {
+      select.innerHTML = '<option value="" disabled>Crie um assunto antes de cadastrar tarefas</option>';
+      select.disabled = true;
+    } else {
+      const options = topics
+        .map(topic => `<option value="${topic}">${topic}</option>`)
+        .join('');
+      select.innerHTML = options;
+      select.disabled = false;
+    }
   },
 
   open(task = null) {
@@ -150,4 +157,7 @@ export const ModalView = {
 EventBus.on('dataLoaded', () => ModalView.updateTopicOptions());
 EventBus.on('taskAdded', () => ModalView.updateTopicOptions());
 EventBus.on('taskUpdated', () => ModalView.updateTopicOptions());
-EventBus.on('openTaskModal', (task) => ModalView.open(task));
+
+EventBus.on('openTaskModal', () => ModalView.open());
+EventBus.on('topicsChanged', () => ModalView.updateTopicOptions());
+

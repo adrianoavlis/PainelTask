@@ -9,10 +9,20 @@ export const TaskModel = {
     tasks: []
   },
 
+  ensureDataIntegrity() {
+    if (!Array.isArray(this.data.topics)) {
+      this.data.topics = [];
+    }
+    if (!Array.isArray(this.data.tasks)) {
+      this.data.tasks = [];
+    }
+  },
+
   async init() {
     const loaded = await Storage.load();
     if (loaded) {
       this.data = loaded;
+      this.ensureDataIntegrity();
       EventBus.emit('dataLoaded', this.data);
     }
   },
@@ -48,6 +58,73 @@ export const TaskModel = {
     }
   },
 
+
+  getTasksByTopic(topic) {
+    return this.data.tasks.filter(task => task.topic === topic);
+  },
+
+  addTopic(name) {
+    const topicName = name?.trim();
+    if (!topicName) {
+      return { success: false, message: 'Informe um nome válido para o assunto.' };
+    }
+    if (this.data.topics.includes(topicName)) {
+      return { success: false, message: 'Já existe um assunto com este nome.' };
+    }
+    this.data.topics.push(topicName);
+    this.data.topics.sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+    this.persist();
+    EventBus.emit('topicsChanged', { topics: this.data.topics });
+    return { success: true, topic: topicName };
+  },
+
+  renameTopic(oldName, newName) {
+    const nextName = newName?.trim();
+    if (!nextName) {
+      return { success: false, message: 'Informe um nome válido para o assunto.' };
+    }
+    if (!this.data.topics.includes(oldName)) {
+      return { success: false, message: 'O assunto selecionado não existe mais.' };
+    }
+    if (oldName === nextName) {
+      return { success: true, topic: nextName };
+    }
+    if (this.data.topics.includes(nextName)) {
+      return { success: false, message: 'Já existe outro assunto com este nome.' };
+    }
+
+    this.data.topics = this.data.topics.map(topic => topic === oldName ? nextName : topic);
+    const now = new Date().toISOString();
+    this.data.tasks = this.data.tasks.map(task => {
+      if (task.topic === oldName) {
+        return { ...task, topic: nextName, updatedAt: now };
+      }
+      return task;
+    });
+
+    this.data.topics.sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+    this.persist();
+    EventBus.emit('topicsChanged', { topics: this.data.topics, forcedActive: nextName });
+    EventBus.emit('tasksBulkUpdated', this.data.tasks);
+    return { success: true, topic: nextName };
+  },
+
+  removeTopic(topicName) {
+    if (!this.data.topics.includes(topicName)) {
+      return { success: false, message: 'O assunto informado não existe.' };
+    }
+
+    this.data.topics = this.data.topics.filter(topic => topic !== topicName);
+    const tasksBefore = this.data.tasks.length;
+    this.data.tasks = this.data.tasks.filter(task => task.topic !== topicName);
+    const removedTasks = tasksBefore - this.data.tasks.length;
+
+    this.persist();
+    EventBus.emit('topicsChanged', { topics: this.data.topics, forcedActive: 'Todos' });
+    EventBus.emit('tasksBulkUpdated', this.data.tasks);
+
+    return { success: true, removedTasks };
+
   removeTask(id) {
     const index = this.data.tasks.findIndex(task => task.id === id);
     if (index !== -1) {
@@ -55,6 +132,7 @@ export const TaskModel = {
       this.persist();
       EventBus.emit('taskRemoved', removedTask);
     }
+
   },
 
   persist() {
