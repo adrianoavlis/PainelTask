@@ -103,24 +103,24 @@ const parseICSEvents = (text) => {
 
 const normalizeStatus = (statusField) => {
   if (!statusField || !statusField.value) {
-    return 'todo';
+    return TaskModel.getDefaultStatusId();
   }
 
   const normalized = statusField.value.toLowerCase();
   const mapped = STATUS_MAP[normalized];
   if (mapped) {
-    return mapped;
+    return TaskModel.resolveStatusId(mapped);
   }
 
   if (normalized.includes('progress')) {
-    return 'doing';
+    return TaskModel.resolveStatusId('doing');
   }
 
   if (normalized.includes('complete')) {
-    return 'done';
+    return TaskModel.resolveStatusId('done');
   }
 
-  return 'todo';
+  return TaskModel.getDefaultStatusId();
 };
 
 const resolveTopic = (categoriesField) => {
@@ -177,7 +177,7 @@ export const ICSUtils = {
         'DESCRIPTION:' + (task.notes || ''),
         'DTSTART:' + dtstart,
         'DTEND:' + dtend,
-        'STATUS:' + (task.status === 'done' ? 'COMPLETED' : 'CONFIRMED'),
+        'STATUS:' + (TaskModel.resolveStatusId(task.status) === 'done' ? 'COMPLETED' : 'CONFIRMED'),
         'END:VEVENT'
       );
     });

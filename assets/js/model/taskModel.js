@@ -4,9 +4,27 @@ import { EventBus } from '../core/eventBus.js';
 
 const FALLBACK_TOPIC = 'Geral';
 
-const ALLOWED_STATUSES = new Set(['todo', 'doing', 'done']);
+const DEFAULT_STATUSES = [
+  { id: 'todo', label: 'A Fazer', badgeClass: 'text-bg-secondary' },
+  { id: 'doing', label: 'Em Progresso', badgeClass: 'text-bg-info text-dark' },
+  { id: 'done', label: 'Concluído', badgeClass: 'text-bg-success' }
+];
 
-const normalizeStatus = (status) => ALLOWED_STATUSES.has(status) ? status : 'todo';
+const sanitizeStatusLabel = (label) =>
+  typeof label === 'string' ? label.trim() : '';
+
+const slugify = (label) => {
+  if (typeof label !== 'string') {
+    return 'status';
+  }
+
+  return label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'status';
+};
 
 const normalizeTopicName = (topic) =>
   typeof topic === 'string' ? topic.trim() : '';
@@ -21,6 +39,7 @@ export const TaskModel = {
     meta: {},
     topics: [],
     collaborators: [],
+    statuses: [],
     tasks: []
   },
 
@@ -42,11 +61,43 @@ export const TaskModel = {
       this.data.collaborators = [];
     }
 
+    if (!Array.isArray(this.data.statuses)) {
+      this.data.statuses = [];
+    }
+
+    const normalizedStatuses = [];
+    const usedStatusIds = new Set();
+
+    this.data.statuses.forEach(status => {
+      const normalized = this._normalizeStatusDefinition(status);
+      if (!normalized) {
+        return;
+      }
+
+      let candidateId = normalized.id;
+      let suffix = 1;
+      while (usedStatusIds.has(candidateId)) {
+        candidateId = `${normalized.id}-${suffix++}`;
+      }
+
+      normalized.id = candidateId;
+      usedStatusIds.add(candidateId);
+      normalizedStatuses.push(normalized);
+    });
+
+    if (normalizedStatuses.length === 0) {
+      DEFAULT_STATUSES.forEach(status => {
+        normalizedStatuses.push({ ...status });
+      });
+    }
+
+    this.data.statuses = normalizedStatuses;
+
     if (this.data.topics.length === 0) {
       this.data.topics.push(FALLBACK_TOPIC);
     }
 
-    this._ensureTasksHaveValidTopics();
+    this._ensureDataIntegrity();
 
     EventBus.emit('dataLoaded', this.data);
   },
@@ -63,6 +114,31 @@ export const TaskModel = {
     return this.data.collaborators;
   },
 
+  getDefaultStatus() {
+    return this.data.statuses[0] || null;
+  },
+
+  getDefaultStatusId() {
+    const defaultStatus = this.getDefaultStatus();
+    if (defaultStatus) {
+      return defaultStatus.id;
+    }
+
+    return DEFAULT_STATUSES[0].id;
+  },
+
+  getStatusById(id) {
+    return this._findStatusById(id) || null;
+  },
+
+  resolveStatusId(value) {
+    return this._normalizeStatusId(value);
+  },
+
+  getStatuses() {
+    return this.data.statuses;
+  },
+
   getTaskById(id) {
     return this.data.tasks.find(task => task.id === id);
   },
@@ -73,7 +149,7 @@ export const TaskModel = {
     task.id = `t-${Date.now()}`;
     task.topic = topic;
     task.collaborator = this._resolveExistingCollaborator(task.collaborator) || null;
-    task.status = normalizeStatus(task.status);
+    task.status = this._normalizeStatusId(task.status);
     task.createdAt = nowISO();
     task.updatedAt = nowISO();
 
@@ -113,7 +189,7 @@ export const TaskModel = {
       }
 
       const topic = this._resolveExistingTopic(incomingTask.topic) || defaultTopic;
-      const status = normalizeStatus(incomingTask.status);
+      const status = this._normalizeStatusId(incomingTask.status);
       const priority = typeof incomingTask.priority === 'string' && incomingTask.priority.trim()
         ? incomingTask.priority
         : 'medium';
@@ -169,7 +245,7 @@ export const TaskModel = {
 
       updatedTask.topic = topic;
       updatedTask.collaborator = this._resolveExistingCollaborator(updatedTask.collaborator) || null;
-      updatedTask.status = normalizeStatus(updatedTask.status);
+      updatedTask.status = this._normalizeStatusId(updatedTask.status);
       updatedTask.updatedAt = nowISO();
       this.data.tasks[index] = updatedTask;
 
@@ -280,6 +356,120 @@ export const TaskModel = {
     }
 
     return { success: true, clearedAssignments };
+  },
+
+  addStatus(label) {
+    const normalizedLabel = sanitizeStatusLabel(label);
+    if (!normalizedLabel) {
+      return { success: false, reason: 'empty' };
+    }
+
+    if (this._findStatusByLabelInsensitive(normalizedLabel)) {
+      return { success: false, reason: 'duplicate' };
+    }
+
+    const baseId = slugify(normalizedLabel);
+    let candidateId = baseId;
+    let suffix = 1;
+
+    while (this._findStatusById(candidateId)) {
+      candidateId = `${baseId}-${suffix++}`;
+    }
+
+    const status = {
+      id: candidateId,
+      label: normalizedLabel,
+      badgeClass: 'text-bg-secondary'
+    };
+
+    this.data.statuses.push(status);
+    this.persist();
+
+    EventBus.emit('statusAdded', { ...status });
+    EventBus.emit('statusesChanged', [...this.data.statuses]);
+
+    return { success: true, status };
+  },
+
+  updateStatus(identifier, newLabel) {
+    const status = this._resolveExistingStatus(identifier);
+    if (!status) {
+      return { success: false, reason: 'notfound' };
+    }
+
+    const normalizedLabel = sanitizeStatusLabel(newLabel);
+    if (!normalizedLabel) {
+      return { success: false, reason: 'empty' };
+    }
+
+    const existing = this._findStatusByLabelInsensitive(normalizedLabel);
+    if (existing && existing.id !== status.id) {
+      return { success: false, reason: 'duplicate' };
+    }
+
+    if (status.label === normalizedLabel) {
+      return { success: false, reason: 'unchanged' };
+    }
+
+    const previousLabel = status.label;
+    status.label = normalizedLabel;
+
+    this.persist();
+
+    EventBus.emit('statusUpdated', {
+      id: status.id,
+      oldLabel: previousLabel,
+      newLabel: status.label
+    });
+    EventBus.emit('statusesChanged', [...this.data.statuses]);
+
+    return { success: true, status: { ...status } };
+  },
+
+  removeStatus(identifier) {
+    const status = this._resolveExistingStatus(identifier);
+    if (!status) {
+      return { success: false, reason: 'notfound' };
+    }
+
+    if (this.data.statuses.length <= 1) {
+      return { success: false, reason: 'minimum' };
+    }
+
+    const remaining = this.data.statuses.filter(item => item.id !== status.id);
+
+    let fallback = remaining[0];
+    if (!fallback) {
+      fallback = { ...DEFAULT_STATUSES[0] };
+      remaining.push(fallback);
+    }
+
+    this.data.statuses = remaining;
+
+    let reassignedCount = 0;
+    const now = nowISO();
+    this.data.tasks.forEach(task => {
+      if (task.status === status.id) {
+        task.status = fallback.id;
+        task.updatedAt = now;
+        reassignedCount++;
+      }
+    });
+
+    this.persist();
+
+    EventBus.emit('statusRemoved', {
+      removed: { ...status },
+      fallback: { ...fallback },
+      reassignedCount
+    });
+    EventBus.emit('statusesChanged', [...this.data.statuses]);
+
+    if (reassignedCount > 0) {
+      EventBus.emit('tasksBulkUpdated', [...this.data.tasks]);
+    }
+
+    return { success: true, fallback, reassignedCount };
   },
 
   addTopic(name) {
@@ -395,25 +585,34 @@ export const TaskModel = {
     Storage.save(this.data);
   },
 
-  _ensureTasksHaveValidTopics() {
-    const validTopics = new Set(this.data.topics);
-    const validCollaborators = new Set(this.data.collaborators);
-    if (validTopics.size === 0) {
-      const fallback = FALLBACK_TOPIC;
-      this.data.topics = [fallback];
-      validTopics.add(fallback);
+  _ensureDataIntegrity() {
+    if (!Array.isArray(this.data.topics) || this.data.topics.length === 0) {
+      this.data.topics = [FALLBACK_TOPIC];
     }
 
+    if (!Array.isArray(this.data.statuses) || this.data.statuses.length === 0) {
+      this.data.statuses = DEFAULT_STATUSES.map(status => ({ ...status }));
+    }
+
+    const validTopics = new Set(this.data.topics);
+    const validCollaborators = new Set(this.data.collaborators);
+    const validStatuses = new Set(this.data.statuses.map(status => status.id));
+
     const fallbackTopic = this.data.topics[0];
+    const fallbackStatus = this.getDefaultStatusId();
+
     let needsPersist = false;
 
     this.data.tasks.forEach(task => {
-      const resolved = this._resolveExistingTopic(task.topic) || fallbackTopic;
-      const normalizedStatus = normalizeStatus(task.status);
+      const resolvedTopic = this._resolveExistingTopic(task.topic) || fallbackTopic;
+      const normalizedStatus = validStatuses.has(task.status)
+        ? task.status
+        : fallbackStatus;
+
       let updated = false;
 
-      if (task.topic !== resolved) {
-        task.topic = resolved;
+      if (task.topic !== resolvedTopic) {
+        task.topic = resolvedTopic;
         updated = true;
       }
 
@@ -438,6 +637,41 @@ export const TaskModel = {
     }
   },
 
+  _normalizeStatusDefinition(status) {
+    if (!status) {
+      return null;
+    }
+
+    if (typeof status === 'string') {
+      const label = sanitizeStatusLabel(status);
+      if (!label) {
+        return null;
+      }
+
+      const id = slugify(label);
+      return { id, label, badgeClass: 'text-bg-secondary' };
+    }
+
+    const label = sanitizeStatusLabel(status.label ?? status.name ?? status.id);
+    if (!label) {
+      return null;
+    }
+
+    let id = typeof status.id === 'string' && status.id.trim()
+      ? slugify(status.id)
+      : slugify(label);
+
+    if (!id) {
+      id = slugify(label);
+    }
+
+    const badgeClass = typeof status.badgeClass === 'string' && status.badgeClass.trim()
+      ? status.badgeClass.trim()
+      : 'text-bg-secondary';
+
+    return { id, label, badgeClass };
+  },
+
   _findTopicInsensitive(topicName) {
     if (!topicName) return undefined;
     const normalized = normalizeTopicName(topicName).toLowerCase();
@@ -456,5 +690,41 @@ export const TaskModel = {
 
   _resolveExistingCollaborator(name) {
     return this._findCollaboratorInsensitive(name);
+  },
+
+  _findStatusById(id) {
+    if (!id) return undefined;
+    const normalized = id.toLowerCase();
+    return this.data.statuses.find(status => status.id.toLowerCase() === normalized);
+  },
+
+  _findStatusByLabelInsensitive(label) {
+    if (!label) return undefined;
+    const normalized = sanitizeStatusLabel(label).toLowerCase();
+    return this.data.statuses.find(status => status.label.toLowerCase() === normalized);
+  },
+
+  _resolveExistingStatus(value) {
+    if (!value) {
+      return undefined;
+    }
+
+    return this._findStatusById(value) || this._findStatusByLabelInsensitive(value);
+  },
+
+  _normalizeStatusId(status) {
+    const resolved = this._resolveExistingStatus(status);
+    if (resolved) {
+      return resolved.id;
+    }
+
+    const defaultStatus = this.getDefaultStatus();
+    if (defaultStatus) {
+      return defaultStatus.id;
+    }
+
+    const fallback = { ...DEFAULT_STATUSES[0] };
+    this.data.statuses.push(fallback);
+    return fallback.id;
   }
 };

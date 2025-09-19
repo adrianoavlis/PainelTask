@@ -12,6 +12,7 @@ import { ICSUtils } from './core/icsUtils.js';
 import { EventBus } from './core/eventBus.js';
 import { TopicManagerView } from './view/topicManagerView.js';
 import { CollaboratorManagerView } from './view/collaboratorManagerView.js';
+import { StatusManagerView } from './view/statusManagerView.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   ToastView.init();
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   TaskDetailView.init();
   TopicManagerView.init();
   CollaboratorManagerView.init();
+  StatusManagerView.init();
 
   const modeToggleBtn = document.getElementById('toggle-mode');
   const importBtn = document.getElementById('import-json');
@@ -197,6 +199,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     let message = `Colaborador "${collaborator}" removido.`;
     if (clearedAssignments > 0) {
       message += ` ${clearedAssignments} tarefa(s) ficaram sem responsável.`;
+    }
+    ToastView.show(message, 'warning');
+  });
+
+  EventBus.on('statusAdded', (status) => {
+    ToastView.show(`Status "${status.label}" criado com sucesso!`, 'success');
+  });
+
+  EventBus.on('statusUpdated', ({ oldLabel, newLabel }) => {
+    let message = 'Status atualizado.';
+    if (oldLabel !== newLabel) {
+      message += ` Novo nome: "${newLabel}".`;
+    }
+    ToastView.show(message, 'info');
+  });
+
+  EventBus.on('statusRemoved', ({ removed, fallback, reassignedCount }) => {
+    let message = `Status "${removed.label}" removido.`;
+    if (reassignedCount > 0 && fallback) {
+      message += ` ${reassignedCount} tarefa(s) movida(s) para "${fallback.label}".`;
     }
     ToastView.show(message, 'warning');
   });
