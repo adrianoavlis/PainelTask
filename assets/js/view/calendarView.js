@@ -157,6 +157,8 @@ export const CalendarView = {
             const badge = document.createElement('span');
             const badgeClass = STATUS_BADGE[task.status] || 'text-bg-primary';
             badge.className = `badge ${badgeClass} d-block text-start text-wrap w-100`;
+            badge.setAttribute('role', 'button');
+            badge.tabIndex = 0;
             badge.textContent = this._formatTaskLabel(task);
             const periodLabel = this._formatTaskPeriod(task);
             if (periodLabel) {
@@ -164,6 +166,15 @@ export const CalendarView = {
             } else {
               badge.title = task.title;
             }
+            badge.addEventListener('click', () => {
+              EventBus.emit('openTaskDetail', task);
+            });
+            badge.addEventListener('keydown', event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                EventBus.emit('openTaskDetail', task);
+              }
+            });
             list.appendChild(badge);
           });
 
