@@ -150,4 +150,5 @@ export const ModalView = {
 EventBus.on('dataLoaded', () => ModalView.updateTopicOptions());
 EventBus.on('taskAdded', () => ModalView.updateTopicOptions());
 EventBus.on('taskUpdated', () => ModalView.updateTopicOptions());
+EventBus.on('topicsChanged', () => ModalView.updateTopicOptions());
 EventBus.on('openTaskModal', (task) => ModalView.open(task));
