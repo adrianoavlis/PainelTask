@@ -4,31 +4,25 @@
     "generatedAt": "2025-09-19T02:00:00-03:00"
   },
   "topics": [
-    "TCC",
-    "Trabalho",
-    "Pessoal"
-  ],
-  "collaborators": [
-    "Maria Silva",
-    "João Santos",
-    "Beatriz Lima"
+    "Melhorias",
+    "Núcleos BD",
+    "Núcleos CD"
   ],
   "tasks": [
     {
       "id": "t-20250919-001",
-      "title": "Modelar tabela de preços",
-      "topic": "TCC",
-      "status": "todo",
+      "title": "Importação Consig.",
+      "topic": "Melhorias",
+      "status": "doing",
       "priority": "high",
-      "startDate": "2025-09-20",
+      "startDate": "2025-09-15",
       "dueDate": "2025-09-22",
       "allDay": true,
       "repeat": null,
       "tags": [
-        "SQL",
-        "DIEESE"
+        "SQL"
       ],
-      "notes": "Checar variação mensal",
+      "notes": "",
       "checklist": [
         {
           "text": "Definir colunas",
@@ -40,7 +34,154 @@
         }
       ],
       "createdAt": "2025-09-19T02:00:00-03:00",
-      "updatedAt": "2025-09-19T02:00:00-03:00"
+      "updatedAt": "2025-09-19T19:28:24.357Z",
+      "collaborator": "Adriano",
+      "dependencies": [
+        "t-1758299050473"
+      ]
+    },
+    {
+      "title": "teste",
+      "topic": "Melhorias",
+      "startDate": "2025-09-01",
+      "dueDate": "",
+      "priority": "low",
+      "tags": [],
+      "notes": "",
+      "id": "t-1758299050473",
+      "status": "todo",
+      "createdAt": "2025-09-19T16:24:10.473Z",
+      "updatedAt": "2025-09-19T19:28:03.145Z",
+      "collaborator": "Dennys",
+      "dependencies": []
+    },
+    {
+      "title": "teste sem data",
+      "topic": "Melhorias",
+      "startDate": "",
+      "dueDate": "",
+      "priority": "high",
+      "tags": [],
+      "notes": "",
+      "id": "t-1758299074540",
+      "status": "todo",
+      "createdAt": "2025-09-19T16:24:34.540Z",
+      "updatedAt": "2025-09-19T19:26:38.093Z",
+      "collaborator": null,
+      "dependencies": []
+    },
+    {
+      "title": "Dados Cadastrais",
+      "topic": "Núcleos BD",
+      "startDate": "",
+      "dueDate": "",
+      "priority": "high",
+      "tags": [
+        "Melhoria",
+        "Área Restrita"
+      ],
+      "notes": "",
+      "id": "t-1758299432543",
+      "status": "java",
+      "createdAt": "2025-09-19T16:30:32.543Z",
+      "updatedAt": "2025-09-19T19:04:43.374Z",
+      "collaborator": null,
+      "dependencies": []
+    },
+    {
+      "title": "Teste Analise ",
+      "topic": "Núcleos CD",
+      "collaborator": "Adriano",
+      "startDate": "2025-09-19",
+      "dueDate": "2025-09-22",
+      "priority": "high",
+      "tags": [],
+      "notes": "",
+      "id": "t-1758308725139",
+      "status": "analise",
+      "createdAt": "2025-09-19T19:05:25.139Z",
+      "updatedAt": "2025-09-19T22:18:56.622Z",
+      "dependencies": [
+        "t-1758299432543"
+      ]
+    },
+    {
+      "title": "A",
+      "topic": "Melhorias",
+      "collaborator": "Adriano",
+      "startDate": "",
+      "dueDate": "",
+      "priority": "low",
+      "tags": [],
+      "notes": "",
+      "dependencies": [
+        "t-1758299050473"
+      ],
+      "id": "t-1758316129081",
+      "status": "todo",
+      "createdAt": "2025-09-19T21:08:49.081Z",
+      "updatedAt": "2025-09-19T21:08:49.081Z"
+    }
+  ],
+  "collaborators": [
+    "Adriano",
+    "Bruna",
+    "Rafael",
+    "Thiago",
+    "Luana",
+    "Guilherme",
+    "Ana",
+    "Lucas",
+    "Dennys"
+  ],
+  "statuses": [
+    {
+      "id": "todo",
+      "label": "A Fazer",
+      "badgeClass": "text-bg-secondary",
+      "order": 0,
+      "previousId": null,
+      "nextId": "analise"
+    },
+    {
+      "id": "analise",
+      "label": "Analise",
+      "badgeClass": "text-bg-secondary",
+      "order": 1,
+      "previousId": "todo",
+      "nextId": "doing"
+    },
+    {
+      "id": "doing",
+      "label": "Desenvolvimento",
+      "badgeClass": "text-bg-info text-dark",
+      "order": 2,
+      "previousId": "analise",
+      "nextId": "java"
+    },
+    {
+      "id": "java",
+      "label": "Java",
+      "badgeClass": "text-bg-secondary",
+      "order": 3,
+      "previousId": "doing",
+      "nextId": "teste"
+    },
+    {
+      "id": "teste",
+      "label": "Teste",
+      "badgeClass": "text-bg-secondary",
+      "order": 4,
+      "previousId": "java",
+      "nextId": "done"
+    },
+    {
+      "id": "done",
+      "label": "Concluído",
+      "badgeClass": "text-bg-success",
+      "order": 5,
+      "previousId": "teste",
+      "nextId": null
     }
   ]
 }
