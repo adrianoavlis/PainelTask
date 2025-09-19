@@ -1,12 +1,6 @@
 import { EventBus } from '../core/eventBus.js';
 import { TaskModel } from '../model/taskModel.js';
 
-const STATUS_DETAILS = {
-  todo: { label: 'A Fazer', className: 'bg-secondary' },
-  doing: { label: 'Em Progresso', className: 'bg-info text-dark' },
-  done: { label: 'Concluído', className: 'bg-success' }
-};
-
 export const TaskDetailView = {
   modal: null,
   modalEl: null,
@@ -47,11 +41,7 @@ export const TaskDetailView = {
               <div class="mt-3 row g-3 align-items-end">
                 <div class="col-md-6">
                   <h6 class="fw-bold mb-1">Status</h6>
-                  <select class="form-select" data-detail="statusSelect">
-                    <option value="todo">A Fazer</option>
-                    <option value="doing">Em Progresso</option>
-                    <option value="done">Concluído</option>
-                  </select>
+                  <select class="form-select" data-detail="statusSelect"></select>
                   <small class="d-block mt-2 text-muted">Atual: <span class="badge" data-detail="statusBadge"></span></small>
                 </div>
                 <div class="col-md-6">
@@ -85,14 +75,16 @@ export const TaskDetailView = {
     this.modal = new bootstrap.Modal(this.modalEl);
 
     const statusSelect = this.modalEl.querySelector('[data-detail="statusSelect"]');
+    this._populateStatusSelect();
+
     statusSelect.addEventListener('change', event => {
       if (!this.currentTask) {
         return;
       }
 
       const newStatus = event.target.value;
-      if (!STATUS_DETAILS[newStatus]) {
-        event.target.value = this.currentTask.status || 'todo';
+      if (!TaskModel.getStatusById(newStatus)) {
+        event.target.value = this.currentTask.status || TaskModel.getDefaultStatusId();
         return;
       }
 
@@ -127,6 +119,20 @@ export const TaskDetailView = {
     });
 
     EventBus.on('openTaskDetail', task => this.open(task));
+
+    EventBus.on('statusesChanged', () => {
+      if (this.currentTask) {
+        const latestTask = TaskModel.getTaskById(this.currentTask.id);
+        if (latestTask) {
+          this.currentTask = { ...latestTask };
+          this.fillDetails(this.currentTask);
+          return;
+        }
+      }
+
+      this._populateStatusSelect();
+      this._updateStatusBadge(TaskModel.getDefaultStatusId());
+    });
   },
 
   open(task) {
@@ -145,12 +151,13 @@ export const TaskDetailView = {
     this.setText('startDate', task.startDate || '—');
     this.setText('dueDate', task.dueDate || '—');
 
-    const statusValue = STATUS_DETAILS[task.status] ? task.status : 'todo';
+    const resolvedStatus = TaskModel.resolveStatusId(task.status);
+    this._populateStatusSelect(resolvedStatus);
     const statusSelect = this.modalEl.querySelector('[data-detail="statusSelect"]');
     if (statusSelect) {
-      statusSelect.value = statusValue;
+      statusSelect.value = resolvedStatus;
     }
-    this._updateStatusBadge(statusValue);
+    this._updateStatusBadge(resolvedStatus);
 
     const priorityEl = this.modalEl.querySelector('[data-detail="priority"]');
     const priorityLabels = {
@@ -197,10 +204,12 @@ export const TaskDetailView = {
       priorityEl.className = 'badge';
     }
     const statusSelect = this.modalEl.querySelector('[data-detail="statusSelect"]');
+    const defaultStatus = TaskModel.getDefaultStatusId();
     if (statusSelect) {
-      statusSelect.value = 'todo';
+      this._populateStatusSelect(defaultStatus);
+      statusSelect.value = defaultStatus;
     }
-    this._updateStatusBadge('todo');
+    this._updateStatusBadge(defaultStatus);
   },
 
   setText(attribute, text) {
@@ -210,14 +219,38 @@ export const TaskDetailView = {
     }
   },
 
-  _updateStatusBadge(status) {
+  _updateStatusBadge(statusId) {
     const statusBadge = this.modalEl.querySelector('[data-detail="statusBadge"]');
     if (!statusBadge) {
       return;
     }
 
-    const statusInfo = STATUS_DETAILS[status] || { label: 'A Fazer', className: 'bg-secondary' };
-    statusBadge.className = `badge ${statusInfo.className}`;
-    statusBadge.textContent = statusInfo.label;
+    const status = TaskModel.getStatusById(statusId) || TaskModel.getStatusById(TaskModel.getDefaultStatusId());
+    const label = status?.label || 'A Fazer';
+    const badgeClass = status?.badgeClass || 'bg-secondary';
+
+    statusBadge.className = `badge ${badgeClass}`;
+    statusBadge.textContent = label;
+  },
+
+  _populateStatusSelect(selectedId) {
+    const statusSelect = this.modalEl?.querySelector('[data-detail="statusSelect"]');
+    if (!statusSelect) {
+      return;
+    }
+
+    const statuses = TaskModel.getStatuses();
+    statusSelect.innerHTML = '';
+
+    statuses.forEach(status => {
+      const option = document.createElement('option');
+      option.value = status.id;
+      option.textContent = status.label;
+      statusSelect.appendChild(option);
+    });
+
+    const defaultStatus = TaskModel.getDefaultStatusId();
+    const statusToSelect = statuses.find(status => status.id === selectedId)?.id || defaultStatus;
+    statusSelect.value = statusToSelect;
   }
 };

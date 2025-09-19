@@ -18,10 +18,13 @@ import { ptBR } from 'https://cdn.jsdelivr.net/npm/date-fns@3.6.0/locale/pt-BR/+
 
 const WEEK_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-const STATUS_BADGE = {
-  todo: 'text-bg-secondary',
-  doing: 'text-bg-info',
-  done: 'text-bg-success'
+const getStatusBadgeClass = (statusId) => {
+  const status = TaskModel.getStatusById(statusId);
+  if (status && status.badgeClass) {
+    return status.badgeClass;
+  }
+
+  return 'text-bg-primary';
 };
 
 export const CalendarView = {
@@ -155,7 +158,7 @@ export const CalendarView = {
 
           dayTasks.forEach(task => {
             const badge = document.createElement('span');
-            const badgeClass = STATUS_BADGE[task.status] || 'text-bg-primary';
+            const badgeClass = getStatusBadgeClass(task.status);
             badge.className = `badge ${badgeClass} d-block text-start text-wrap w-100`;
             badge.setAttribute('role', 'button');
             badge.tabIndex = 0;
@@ -265,5 +268,9 @@ EventBus.on('taskRemoved', () => {
 });
 
 EventBus.on('tasksBulkUpdated', () => {
+  CalendarView.render(CalendarView.currentMonth, CalendarView.currentTopic);
+});
+
+EventBus.on('statusesChanged', () => {
   CalendarView.render(CalendarView.currentMonth, CalendarView.currentTopic);
 });
