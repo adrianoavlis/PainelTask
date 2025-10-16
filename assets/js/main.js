@@ -13,6 +13,7 @@ import { EventBus } from './core/eventBus.js';
 import { TopicManagerView } from './view/topicManagerView.js';
 import { CollaboratorManagerView } from './view/collaboratorManagerView.js';
 import { StatusManagerView } from './view/statusManagerView.js';
+import { generateReport } from './utils/reportGenerator.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   ToastView.init();
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const importICSBtn = document.getElementById('import-ics');
   const exportBtn = document.getElementById('export-json');
   const exportICSBtn = document.getElementById('export-ics');
+  const reportBtn = document.getElementById('generate-report');
   const fileInput = document.getElementById('json-file');
   const icsFileInput = document.getElementById('ics-file');
   const headerMenuToggle = document.getElementById('header-menu-toggle');
@@ -126,6 +128,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await TaskModel.init();
+
+  if (reportBtn) {
+    reportBtn.addEventListener('click', () => {
+      try {
+        const { markdown, snapshotDate } = generateReport(TaskModel.data);
+        const fallbackDate = new Date().toISOString().slice(0, 10);
+        const normalizedDate = snapshotDate && snapshotDate !== 'data indisponível'
+          ? snapshotDate
+              .replace(/[^0-9]/g, '-')
+              .replace(/-+/g, '-')
+              .replace(/^-|-$/g, '')
+          : fallbackDate;
+        const fileName = `relatorio-${normalizedDate || fallbackDate}.md`;
+        const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        ToastView.show('Relatório gerado com sucesso!', 'success');
+      } catch (error) {
+        console.error('Falha ao gerar relatório:', error);
+        ToastView.show('Não foi possível gerar o relatório.', 'danger');
+      }
+    });
+  }
 
   const fab = document.createElement('button');
   fab.className = 'btn btn-primary rounded-circle position-fixed';
