@@ -35,6 +35,20 @@ Uma aplicação que permite gerenciar tarefas por assunto e visualizar tudo num 
 
 ---
 
+## 🧾 Gerar relatórios automáticos
+
+Crie um resumo mensal a partir dos arquivos JSON com o script:
+
+```bash
+node scripts/generate-report.js data/2025/2025-09.json reports/2025-09-19.md
+```
+
+O relatório é exportado em Markdown com panorama geral, destaques por status e recomendações baseadas nos dados do snapshot.
+
+Também é possível gerar o relatório atual diretamente pelo menu **Gerar Relatório** na interface web.
+
+---
+
 ## 📁 Estrutura do projeto
 
 ```
