@@ -3,6 +3,23 @@ import { EventBus } from '../core/eventBus.js';
 
 const PAGE_SIZE = 3;
 
+const PRIORITY_LABELS = {
+  high: 'Alta',
+  medium: 'Média',
+  low: 'Baixa'
+};
+
+function getDateUrgency(dueDateStr) {
+  if (!dueDateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDateStr);
+  due.setHours(0, 0, 0, 0);
+  if (due.getTime() === today.getTime()) return 'today';
+  if (due < today) return 'overdue';
+  return null;
+}
+
 export const ListView = {
   pageState: new Map(),
 
@@ -29,6 +46,8 @@ export const ListView = {
       content.appendChild(row);
       return;
     }
+
+    const lastStatusId = statuses[statuses.length - 1]?.id;
 
     statuses.forEach(status => {
       const col = document.createElement('div');
@@ -81,7 +100,11 @@ export const ListView = {
         visibleTasks.forEach(task => {
           const card = document.createElement('div');
 
+          const urgency = status.id !== lastStatusId ? getDateUrgency(task.dueDate) : null;
+
           card.className = 'card task-card';
+          if (urgency === 'overdue') card.classList.add('task-card--overdue');
+          if (urgency === 'today') card.classList.add('task-card--due-today');
           card.tabIndex = 0;
           card.setAttribute('role', 'button');
 
@@ -110,7 +133,7 @@ export const ListView = {
             low: 'badge bg-light text-dark'
           };
           priorityBadge.className = priorityClasses[task.priority] || 'badge bg-light text-dark';
-          priorityBadge.textContent = task.priority;
+          priorityBadge.textContent = PRIORITY_LABELS[task.priority] || task.priority;
 
           meta.appendChild(topicBadge);
           meta.appendChild(priorityBadge);
@@ -134,6 +157,19 @@ export const ListView = {
 
           body.appendChild(title);
           body.appendChild(date);
+
+          if (urgency === 'overdue') {
+            const urgencyBadge = document.createElement('span');
+            urgencyBadge.className = 'task-card__urgency task-card__urgency--overdue';
+            urgencyBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> Atrasada';
+            body.appendChild(urgencyBadge);
+          } else if (urgency === 'today') {
+            const urgencyBadge = document.createElement('span');
+            urgencyBadge.className = 'task-card__urgency task-card__urgency--today';
+            urgencyBadge.innerHTML = '<i class="fa-solid fa-clock" aria-hidden="true"></i> Vence hoje';
+            body.appendChild(urgencyBadge);
+          }
+
           body.appendChild(meta);
 
           card.appendChild(body);

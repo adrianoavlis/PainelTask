@@ -1,6 +1,12 @@
 
 const STORAGE_KEY = 'taskboard-data';
-const BASE_REPO_PATH = './data/2025/2025-09.json';
+
+function getRepoPath() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `./data/${year}/${year}-${month}.json`;
+}
 
 export const Storage = {
   mode: 'local', // 'local' | 'repo'
@@ -12,7 +18,7 @@ export const Storage = {
   async load() {
     if (this.mode === 'repo') {
       try {
-        const response = await fetch(BASE_REPO_PATH);
+        const response = await fetch(getRepoPath());
         if (!response.ok) throw new Error('Erro ao carregar dados do repositório.');
         const json = await response.json();
         return json;

@@ -1,5 +1,5 @@
 // Utils com date-fns
-export {
+import {
   format,
   parseISO,
   isToday,
@@ -13,6 +13,21 @@ export {
   addMonths,
   subMonths
 } from 'https://cdn.jsdelivr.net/npm/date-fns@3.6.0/+esm';
+
+export {
+  format,
+  parseISO,
+  isToday,
+  isWeekend,
+  isSameDay,
+  addDays,
+  startOfMonth,
+  endOfMonth,
+  getDay,
+  differenceInDays,
+  addMonths,
+  subMonths
+};
 /**
  * Formata uma data ISO para 'dd/MM/yyyy'
  * @param {string|Date} date

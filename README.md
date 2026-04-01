@@ -9,11 +9,15 @@ Uma aplicação que permite gerenciar tarefas por assunto e visualizar tudo num 
 
 - 📅 **Calendário dinâmico** (modo grade mensal)
 - 🗂️ **Abas por assunto** (ex: TCC, Trabalho, Pessoal)
-- 🧱 **Lista estilo Kanban** com status (To-do, Doing, Done)
+- 🧱 **Lista estilo Kanban** com status personalizáveis (A Fazer, Em Progresso, Concluído)
 - ✏️ **CRUD de tarefas** com formulário modal
+- 👥 **Gerenciamento de colaboradores** por tarefa
+- 🏷️ **Gerenciamento de assuntos e status** (criar, editar, remover, reordenar)
+- 🔗 **Dependências entre tarefas**
 - 💾 **Modo Local (LocalStorage)** e **Modo Repo (JSON externo)**
 - 🔁 **Importar e Exportar tarefas em JSON**
-- 📆 **Exportar para Calendário (ICS - iCalendar)**
+- 📆 **Importar e Exportar para Calendário (ICS - iCalendar)**
+- 📊 **Gerar Relatório em Markdown** (via UI ou script CLI)
 - 🔔 **Toasts de feedback**
 - 📦 **Deploy-ready no GitHub Pages**
 
@@ -31,7 +35,7 @@ Uma aplicação que permite gerenciar tarefas por assunto e visualizar tudo num 
 
 ### 2. **GitHub Pages**
 
-- Acesse: `https://adrianoavlis.github.io/PainelTask/`)
+- Acesse: `https://adrianoavlis.github.io/PainelTask/`
 
 ---
 
@@ -57,23 +61,33 @@ Também é possível gerar o relatório atual diretamente pelo menu **Gerar Rela
 ├── data/
 │   └── 2025/
 │       └── 2025-09.json
-├── assets/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       ├── main.js
-│       ├── model/taskModel.js
-│       ├── core/
-│       │   ├── eventBus.js
-│       │   ├── storage.js
-│       │   ├── exportUtils.js
-│       │   └── icsUtils.js
-│       └── view/
-│           ├── calendarView.js
-│           ├── listView.js
-│           ├── modalView.js
-│           ├── tabsView.js
-│           └── toastView.js
+├── reports/
+│   └── 2025-09-19.md
+├── scripts/
+│   └── generate-report.js
+└── assets/
+    ├── css/
+    │   └── style.css
+    └── js/
+        ├── main.js
+        ├── model/
+        │   └── taskModel.js
+        ├── core/
+        │   ├── eventBus.js
+        │   ├── storage.js
+        │   ├── exportUtils.js
+        │   ├── icsUtils.js
+        │   └── utilDate.js
+        └── view/
+            ├── calendarView.js
+            ├── listView.js
+            ├── modalView.js
+            ├── tabsView.js
+            ├── taskDetailView.js
+            ├── toastView.js
+            ├── collaboratorManagerView.js
+            ├── statusManagerView.js
+            └── topicManagerView.js
 ```
 
 ---
@@ -82,9 +96,11 @@ Também é possível gerar o relatório atual diretamente pelo menu **Gerar Rela
 
 - HTML5 + CSS3
 - Bootstrap 5.3.3
+- Font Awesome 6.5.2
 - JavaScript moderno (ES Modules)
+- date-fns 3.6.0
 - localStorage / JSON externo
-- ICS (.ics) export para integração com calendários
+- ICS (.ics) export/import para integração com calendários
 
 ---
 
@@ -94,7 +110,7 @@ Também é possível gerar o relatório atual diretamente pelo menu **Gerar Rela
 Salva tarefas no `localStorage` do navegador. Ideal para uso pessoal, testes, ou como rascunho.
 
 ### Modo Repositório (`?mode=repo`)
-Lê dados diretamente de `/data/YYYY-MM.json`. Para atualizar:
+Lê dados diretamente de `/data/YYYY/YYYY-MM.json`. Para atualizar:
 1. Exporte as tarefas via botão.
 2. Faça **commit** no GitHub com o novo JSON.
 
@@ -112,12 +128,12 @@ Lê dados diretamente de `/data/YYYY-MM.json`. Para atualizar:
 ## 🧠 Contribuições futuras (sugestões)
 
 - Drag-and-drop nos cards (Kanban)
-- Checklist por tarefa
+- Checklist por tarefa (já suportado no modelo de dados)
 - Notificações de vencimento
 - Tema escuro / claro
 - Sincronização com Google Calendar (via backend)
+- Caminho do JSON de repositório dinâmico por mês
 
 ---
 
 Desenvolvido por [Luis Adriano] para projeto pessoal e open-source!
-

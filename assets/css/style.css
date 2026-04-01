@@ -445,6 +445,36 @@ footer {
   outline-offset: 4px;
 }
 
+.task-card--overdue {
+  border-left: 3px solid var(--bs-danger) !important;
+}
+
+.task-card--due-today {
+  border-left: 3px solid var(--bs-warning) !important;
+}
+
+.task-card__urgency {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.task-card__urgency--overdue {
+  background-color: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.task-card__urgency--today {
+  background-color: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+
 .status-pagination {
   display: flex;
   align-items: center;

@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   EventBus.on('topicSelected', topic => {
     CalendarView.render(CalendarView.currentMonth, topic);
-    ListView.render(topic);
   });
 
   EventBus.on('taskAdded', () => {
