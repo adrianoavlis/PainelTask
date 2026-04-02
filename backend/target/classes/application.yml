@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: paineltask-backend
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=PainelTaskDB;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: PainelTask@2024
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: true
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: paineltask-super-secret-key-min-256-bits-for-hs256-algorithm
+    expiration: 86400000  # 24h em ms
+
+logging:
+  level:
+    com.paineltask: INFO
+    org.springframework.security: WARN

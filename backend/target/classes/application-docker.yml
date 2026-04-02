@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://${DB_HOST:sqlserver}:${DB_PORT:1433};databaseName=${DB_NAME:PainelTaskDB};encrypt=false;trustServerCertificate=true
+    username: ${DB_USER:sa}
+    password: ${DB_PASS:PainelTask@2024}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:paineltask-super-secret-key-min-256-bits-for-hs256-algorithm}
+    expiration: ${JWT_EXPIRATION:86400000}

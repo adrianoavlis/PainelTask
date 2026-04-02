@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(find ./assets/js/view -name \"*.js\" -exec wc -l {} \\\\;)",
+      "Bash(find ./assets/js/core -name \"*.js\" -exec wc -l {} \\\\;)",
+      "Bash(xargs wc:*)",
+      "Bash(docker info:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker compose:*)",
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(npm --version)",
+      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=dev)",
+      "Bash(echo \"Backend PID: $!\")",
+      "Bash(curl -s http://localhost:8080/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"admin@paineltask.com\",\"password\":\"admin123\"}')",
+      "Bash(xargs grep:*)",
+      "Bash(pkill -f \"spring-boot:run\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /PID 11564 /F)",
+      "Bash(kill -9 11564)",
+      "Bash(cmd /c \"taskkill /PID 11564 /F\")",
+      "Bash(cmd /c \"taskkill /F /IM java.exe\")",
+      "Bash(cmd:*)",
+      "Bash(curl:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 7344 -Force\")",
+      "Bash(powershell -Command \"Get-Process java | Stop-Process -Force\")"
+    ]
+  }
+}

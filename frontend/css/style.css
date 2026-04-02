@@ -1,0 +1,86 @@
+/* =====================================================
+   PainelTask — Global Styles
+   ===================================================== */
+
+:root {
+    --pt-bg-page:     #f0f2f5;
+    --pt-card-radius: 12px;
+    --pt-transition:  all 0.2s ease;
+}
+
+/* Base */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--pt-bg-page);
+    color: #212529;
+}
+
+/* Cards */
+.card {
+    border-radius: var(--pt-card-radius) !important;
+    transition: var(--pt-transition);
+}
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.1) !important;
+}
+
+/* Navbar */
+.navbar {
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.navbar-brand {
+    letter-spacing: .03em;
+}
+
+/* Kanban */
+.kanban-card {
+    cursor: grab;
+    border-radius: 8px !important;
+    transition: var(--pt-transition);
+}
+.kanban-card:active {
+    cursor: grabbing;
+}
+.kanban-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,.12) !important;
+}
+.kanban-card.border-danger {
+    border-left: 3px solid var(--bs-danger) !important;
+}
+
+/* Tables */
+.table th {
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6c757d;
+}
+.table td {
+    font-size: .9rem;
+    vertical-align: middle;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    letter-spacing: .02em;
+}
+
+/* Login page */
+body.d-flex {
+    min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #adb5bd; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .display-6 { font-size: 1.8rem; }
+    main.container-fluid { padding: 1rem !important; }
+}

@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: paineltask-db
+    environment:
+      SA_PASSWORD: "${DB_PASS:-PainelTask@2024}"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${DB_PASS:-PainelTask@2024}", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - paineltask-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: paineltask-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: sqlserver
+      DB_PORT: 1433
+      DB_NAME: "${DB_NAME:-PainelTaskDB}"
+      DB_USER: "${DB_USER:-sa}"
+      DB_PASS: "${DB_PASS:-PainelTask@2024}"
+      JWT_SECRET: "${JWT_SECRET:-paineltask-super-secret-key-min-256-bits-for-hs256-algorithm}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION:-86400000}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - paineltask-net
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: paineltask-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - paineltask-net
+
+volumes:
+  sqlserver_data:
+
+networks:
+  paineltask-net:
+    driver: bridge

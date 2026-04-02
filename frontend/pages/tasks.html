@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PainelTask — Tarefas</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+<div id="navbar"></div>
+
+<main class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="fas fa-list-check me-2 text-primary"></i>Tarefas</h4>
+        <button class="btn btn-primary btn-sm" onclick="openCreate()">
+            <i class="fas fa-plus me-1"></i>Nova Tarefa
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <div class="row g-2">
+                <div class="col-auto">
+                    <select class="form-select form-select-sm" id="filter-status">
+                        <option value="">Todos os status</option>
+                        <option value="TODO">A Fazer</option>
+                        <option value="DOING">Em Progresso</option>
+                        <option value="DONE">Concluído</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Título</th>
+                        <th>Status</th>
+                        <th>Prioridade</th>
+                        <th>Responsável</th>
+                        <th>Tópico</th>
+                        <th>Prazo</th>
+                        <th style="width: 100px">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tasks-tbody">
+                    <tr><td colspan="6" class="text-center py-4">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Tarefa -->
+<div class="modal fade" id="modalTask" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-title">Tarefa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-task">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Título *</label>
+                        <input type="text" class="form-control" id="field-title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" id="field-description" rows="2"></textarea>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="field-status">
+                                <option value="TODO">A Fazer</option>
+                                <option value="DOING">Em Progresso</option>
+                                <option value="DONE">Concluído</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Prioridade</label>
+                            <select class="form-select" id="field-priority">
+                                <option value="LOW">Baixa</option>
+                                <option value="MEDIUM">Média</option>
+                                <option value="HIGH">Alta</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data limite</label>
+                            <input type="date" class="form-control" id="field-due-date">
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Tópico</label>
+                            <input type="text" class="form-control" id="field-topic" placeholder="ex: RH, TI, Financeiro">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tags</label>
+                            <input type="text" class="form-control" id="field-tags" placeholder="tag1,tag2">
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-md-12">
+                            <label class="form-label"><i class="fas fa-user-tag me-1 text-primary"></i>Colaborador Responsável</label>
+                            <select class="form-select" id="field-assigned-to">
+                                <option value="">— Sem responsável —</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="form-label">Notas</label>
+                        <textarea class="form-control" id="field-notes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/tasks.js"></script>
+</body>
+</html>
